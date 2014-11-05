@@ -12,6 +12,11 @@ doc/neddoc
 
 /out
 
+simulations/**/results
+simulations/**/.tkenvrc
+simulations/**/out.tmp
+simulations/**/err.tmp
+
 tests/**/results
 tests/**/.tkenvrc
 tests/**/out.tmp
