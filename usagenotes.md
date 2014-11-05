@@ -6,34 +6,34 @@ For the scripts to work correctly, the `opp_run` binary of OMNeT++ should be in 
 
 The following are some important files; read this to understand how the veins respository/directory is organized.
 
-`./configure` -- run this to generate a Makefile in ./src/
-`./Makefile` -- the makefile that you should use to compile veins code (run ./configure first)
-`./run`, `./debug` and `./memcheck` -- python scripts that run a simulation (regularly, as debug and with valgrind)
-`./examples/veins` -- this directory contains an example:
-`./examples/veins/omnetpp.ini` -- example of an appropriate omnet++ config
-`./examples/veins/RSUExampleScenario.ned` -- example of a .ned file for a scenario.
-`./examples/veins/config.xml` -- example of a VEINS configuration; contains e.g. pathloss model, etc.
-`./examples/veins/erlangen.*.xml` and `erlangen.sumo.cfg` -- example configuration of SUMO that is expected by the example scenario
-`./examples/veins/run` -- a script that starts `opp_run` with some additional parameters (through the python script `./run`)
-`./sumo-launchd.py` -- python script that runs SUMO as needed (see --help)
-`./out` -- directory that will contain object code, libveins.so, and so on. Created by make scripts.
-`./doc` -- documentation.
-`./images` -- images that can be used by the OMNeT++ GUI.
-`./tests` -- tests.
-`./src` -- contains all code.
-`./src/base` -- contains low-level features. Mostly PHY and MAC tools, battery management, mobility basics, channel sensing.
-`./src/inet` -- (3D) Coordinate representation
-`./src/scripts` -- scripts used to generate the run/debug/memcheck tools.
-`./src/nodes` -- contains NED files for network 
-`./src/modules` -- contains tools to be used for simulations:
-`./src/modules/world` -- contains visualization management for OMNeT++ GUI.
-`./src/modules/obstacle` -- contains obstacle modeling [for attenuation].
-`./src/modules/analogueModel` -- contains signal models.
-`./src/modules/phy` -- contains PHY models and PHY<->MAC interfaces.
-`./src/modules/mac` -- contains MAC models (802.11p/1609.4).
-`./src/modules/nic` -- contains a network interface for 802.11p.
-`./src/modules/mobility` -- contains mobility models (currently only TraCI).
-`./src/modules/messages` -- contains message types.
+`./configure` -- run this to generate a Makefile in ./src/  
+`./Makefile` -- the makefile that you should use to compile veins code (run ./configure first)  
+`./run`, `./debug` and `./memcheck` -- python scripts that run a simulation (regularly, as debug and with valgrind)  
+`./examples/veins` -- this directory contains an example:  
+`./examples/veins/omnetpp.ini` -- example of an appropriate omnet++ config  
+`./examples/veins/RSUExampleScenario.ned` -- example of a .ned file for a scenario.  
+`./examples/veins/config.xml` -- example of a VEINS configuration; contains e.g. pathloss model, etc.  
+`./examples/veins/erlangen.*.xml` and `erlangen.sumo.cfg` -- example configuration of SUMO that is expected by the example scenario  
+`./examples/veins/run` -- a script that starts `opp_run` with some additional parameters (through the python script `./run`)  
+`./sumo-launchd.py` -- python script that runs SUMO as needed (see --help)  
+`./out` -- directory that will contain object code, libveins.so, and so on. Created by make scripts.  
+`./doc` -- documentation.  
+`./images` -- images that can be used by the OMNeT++ GUI.  
+`./tests` -- tests.  
+`./src` -- contains all code.  
+`./src/base` -- contains low-level features. Mostly PHY and MAC tools, battery management, mobility basics, channel sensing.  
+`./src/inet` -- (3D) Coordinate representation  
+`./src/scripts` -- scripts used to generate the run/debug/memcheck tools.  
+`./src/nodes` -- contains NED files for network  
+`./src/modules` -- contains tools to be used for simulations:  
+`./src/modules/world` -- contains visualization management for OMNeT++ GUI.  
+`./src/modules/obstacle` -- contains obstacle modeling [for attenuation].  
+`./src/modules/analogueModel` -- contains signal models.  
+`./src/modules/phy` -- contains PHY models and PHY<->MAC interfaces.  
+`./src/modules/mac` -- contains MAC models (802.11p/1609.4).  
+`./src/modules/nic` -- contains a network interface for 802.11p.  
+`./src/modules/mobility` -- contains mobility models (currently only TraCI).  
+`./src/modules/messages` -- contains message types.  
 `./src/modules/application` -- contains actual applications that run ontop of the stack (a TraCI demo app and a basic wave application layer)
 
 ## File types and conventions
