@@ -56,7 +56,7 @@ make
 ```sh
 cd ./examples/veins
 #assuming SUMOPATH contains the name of the sumo executable (or add sumo's `/bin` directory to PATH)
-python sumo-launchd.py -dc "$SUMOPATH"  
+python ../../sumo-launchd.py -dc "$SUMOPATH"  
 ./run
 ```
 This creates a results directory that contains output, which can be analyzed using various tools (amount of output depends on the simulation).
