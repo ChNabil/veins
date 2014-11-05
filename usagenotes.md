@@ -4,6 +4,7 @@ In order to run the most recent version of VEINS (3.0), see [the tutorial](http:
 In particular, make sure you have sumo 0.21.0 and OMNeT++ (these notes assume 4.5).
 For the scripts to work correctly, the `opp_run` binary of OMNeT++ should be in the search path; in other words, `PATH` should contain the omnetpp binary folder (e.g., `/home/namnatulco/ulm/simulation/omnetpp-4.5./bin`)
 
+## Structure
 The following are some important files; read this to understand how the veins respository/directory is organized.
 
 `./configure` -- run this to generate a Makefile in ./src/  
