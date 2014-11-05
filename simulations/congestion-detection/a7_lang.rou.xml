@@ -1,0 +1,207 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<routes>
+     <!-- standard fuer fuehrende FZ-->
+	<vType id="0" length="5.00"  maxSpeed="7.50" color="green">
+        <carFollowing-Krauss accel="1.60" decel="5.50" sigma="0.90"/>
+    </vType>
+	 <!-- standard fuer FZ 35 km/h-->
+	<vType id="1" length="5.00"  maxSpeed="9.75" color="green">
+        <carFollowing-Krauss accel="1.60" decel="5.50" sigma="0.90"/>
+    </vType>
+	 <!-- standard fuer FZ 50 km/h-->
+	 <vType id="3" length="5.00"  maxSpeed="13.9" color="yellow">
+        <carFollowing-Krauss accel="1.60" decel="5.50" sigma="0.90"/>
+    </vType>
+	 <!-- standard fuer FZ ca. 108 km/h-->
+	 <vType id="4" length="5.00" maxSpeed="30.00" color="yellow">
+        <carFollowing-Krauss accel="9.0" decel="9.50" sigma="0.90"/>
+    </vType>
+	 <!-- standard fuer LKW 80 km/h-->
+	 <vType id="5" length="18.00" maxSpeed="22.33" color="yellow">
+        <carFollowing-Krauss accel="6.00" decel="5.50" sigma="0.90"/>
+    </vType>
+	
+	<route id="a7" edges="268374411 47247687 47247686 24771294 24771295 268374419 25632497 25632494 268374449 268374446 268374451 98277603 268374444 268374435 268374443 268374450 27483730 27483728"/>
+	
+
+	<!-- Simulation 1A -->
+	<!--
+	<flow id="f0" type="0" route="a7" departLane="0" arrivalLane="0" begin="0.00" period="0.1" number="5"/>
+	<flow id="f1" type="0" route="a7" departLane="1" arrivalLane="1" begin="0.00" period="0.1" number="5"/>
+	-->
+
+	<!-- Simulation 1B -->
+	<!-- fuehrende fahrzeuge -->
+	<!--
+	<vehicle id="0_0" type="0" route="a7" depart="0.00" departLane="0" arrivalLane="0">
+		<stop lane="24771294_0" endPos="1" until="240"/>
+		<stop lane="24771295_0" endPos="1" until="270"/>
+		<stop lane="268374419_0" endPos="1" until="280"/>
+		<stop lane="25632497_0" endPos="1" until="300"/>
+    </vehicle>
+    <vehicle id="1_0" type="0" route="a7" depart="0.00" departLane="1" arrivalLane="1">
+		<stop lane="24771294_1" endPos="1" until="240"/>
+		<stop lane="24771295_1" endPos="1" until="270"/>
+		<stop lane="268374419_1" endPos="1" until="280"/>
+		<stop lane="25632497_1" endPos="1" until="300"/>
+    </vehicle>
+    <vehicle id="0_1" type="0" route="a7" depart="0.10" departLane="0" arrivalLane="0">
+			<stop lane="24771294_0" endPos="1" until="240"/>
+		<stop lane="24771295_0" endPos="1" until="240"/>
+    </vehicle>
+    <vehicle id="1_1" type="0" route="a7" depart="0.10" departLane="1" arrivalLane="1">
+		<stop lane="24771294_1" endPos="1" until="240"/>
+		<stop lane="24771295_1" endPos="1" until="240"/>
+    </vehicle>
+    <vehicle id="0_2" type="0" route="a7" depart="0.20" departLane="0" arrivalLane="0">
+		<stop lane="24771294_0" endPos="1" until="240"/>
+		<stop lane="24771295_0" endPos="1" until="240"/>
+    </vehicle>
+    <vehicle id="1_2" type="0" route="a7" depart="0.20" departLane="1" arrivalLane="1">
+		<stop lane="24771294_1" endPos="1" until="240"/>
+		<stop lane="24771295_1" endPos="1" until="240"/>
+    </vehicle>
+    <vehicle id="0_3" type="0" route="a7" depart="0.30" departLane="0" arrivalLane="0">
+		<stop lane="24771294_0" endPos="1" until="240"/>
+		<stop lane="24771295_0" endPos="1" until="240"/>
+    </vehicle>
+    <vehicle id="1_3" type="0" route="a7" depart="0.30" departLane="1" arrivalLane="1">
+		<stop lane="24771294_1" endPos="1" until="240"/>
+		<stop lane="24771295_1" endPos="1" until="240"/>
+    </vehicle>
+    <vehicle id="0_4" type="0" route="a7" depart="0.40" departLane="0" arrivalLane="0">
+		<stop lane="24771294_0" endPos="1" until="240"/>
+		<stop lane="24771295_0" endPos="1" until="240"/>
+    </vehicle>
+    <vehicle id="1_4" type="0"  route="a7" depart="0.40" departLane="1" arrivalLane="1">
+		<stop lane="24771294_1" endPos="1" until="240"/>
+		<stop lane="24771295_1" endPos="1" until="240"/>
+    </vehicle>
+	-->
+
+	<!-- Simulation 1C -->
+	<!--
+	<flow id="f0" type="1" route="a7" departLane="0" arrivalLane="0" begin="0.00" period="0.1" number="5"/>
+	<flow id="f1" type="1" route="a7" departLane="1" arrivalLane="1" begin="0.00" period="0.1" number="5"/>
+	-->
+
+	<!-- Simulation 1D & 3 -->
+
+	<vehicle id="0_0" type="1" route="a7" depart="0.00" departLane="0" arrivalLane="0">
+		<stop lane="24771294_0" endPos="1" until="240"/>
+		<stop lane="24771295_0" endPos="1" until="270"/>
+		<stop lane="268374419_0" endPos="1" until="280"/>
+		<stop lane="25632497_0" endPos="1" until="300"/>
+    </vehicle>
+    <vehicle id="1_0" type="1" route="a7" depart="0.00" departLane="1" arrivalLane="1">
+		<stop lane="24771294_1" endPos="1" until="240"/>
+		<stop lane="24771295_1" endPos="1" until="270"/>
+		<stop lane="268374419_1" endPos="1" until="280"/>
+		<stop lane="25632497_1" endPos="1" until="300"/>
+    </vehicle>
+    <vehicle id="0_1" type="1" route="a7" depart="0.10" departLane="0" arrivalLane="0">
+			<stop lane="24771294_0" endPos="1" until="240"/>
+		<stop lane="24771295_0" endPos="1" until="240"/>
+    </vehicle>
+    <vehicle id="1_1" type="1" route="a7" depart="0.10" departLane="1" arrivalLane="1">
+		<stop lane="24771294_1" endPos="1" until="240"/>
+		<stop lane="24771295_1" endPos="1" until="240"/>
+    </vehicle>
+    <vehicle id="0_2" type="1" route="a7" depart="0.20" departLane="0" arrivalLane="0">
+		<stop lane="24771294_0" endPos="1" until="240"/>
+		<stop lane="24771295_0" endPos="1" until="240"/>
+    </vehicle>
+    <vehicle id="1_2" type="1" route="a7" depart="0.20" departLane="1" arrivalLane="1">
+		<stop lane="24771294_1" endPos="1" until="240"/>
+		<stop lane="24771295_1" endPos="1" until="240"/>
+    </vehicle>
+    <vehicle id="0_3" type="1" route="a7" depart="0.30" departLane="0" arrivalLane="0">
+		<stop lane="24771294_0" endPos="1" until="240"/>
+		<stop lane="24771295_0" endPos="1" until="240"/>
+    </vehicle>
+    <vehicle id="1_3" type="1" route="a7" depart="0.30" departLane="1" arrivalLane="1">
+		<stop lane="24771294_1" endPos="1" until="240"/>
+		<stop lane="24771295_1" endPos="1" until="240"/>
+    </vehicle>
+    <vehicle id="0_4" type="1" route="a7" depart="0.40" departLane="0" arrivalLane="0">
+		<stop lane="24771294_0" endPos="1" until="240"/>
+		<stop lane="24771295_0" endPos="1" until="240"/>
+    </vehicle>
+    <vehicle id="1_4" type="1"  route="a7" depart="0.40" departLane="1" arrivalLane="1">
+		<stop lane="24771294_1" endPos="1" until="240"/>
+		<stop lane="24771295_1" endPos="1" until="240"/>
+    </vehicle>
+
+	<!-- test fahrzeug -->
+
+   <vType id="2" length="5.00" maxSpeed="25.00" color="red">
+        <carFollowing-Krauss accel="1.6" decel="5.50" sigma="0.90"/>
+    </vType>
+    <vehicle id="LaFerrari" type="2" route="a7" depart="150.00" departLane="1" arrivalLane="1">
+    </vehicle> 
+
+
+	<!-- folgende fahrzeuge -->
+	<!-- Simulation 1  und 3 -->
+	<flow id="ff0" type="4" route="a7" departLane="0"  begin="151.00" period="0.05" number="45"/>
+	<flow id="ff1" type="4" route="a7" departLane="1"  begin="151.00" period="0.05" number="45"/>
+	
+	<!-- Simulation 2 -->
+	<!--
+	<vehicle id="0_0" type="0" route="a7" depart="0.00" departLane="0" arrivalLane="0">
+		<stop lane="24771294_0" endPos="1" until="240"/>
+		<stop lane="24771295_0" endPos="1" until="270"/>
+		<stop lane="268374419_0" endPos="1" until="280"/>
+		<stop lane="25632497_0" endPos="1" until="300"/>
+	
+    </vehicle>
+    <vehicle id="1_0" type="0" route="a7" depart="0.00" departLane="1" arrivalLane="1">
+		<stop lane="24771294_1" endPos="1" until="240"/>
+		<stop lane="24771295_1" endPos="1" until="270"/>
+		<stop lane="268374419_1" endPos="1" until="280"/>
+		<stop lane="25632497_1" endPos="1" until="300"/>
+    </vehicle>
+    <vehicle id="0_1" type="0" route="a7" depart="0.10" departLane="0" arrivalLane="0">
+			<stop lane="24771294_0" endPos="1" until="240"/>
+		<stop lane="24771295_0" endPos="1" until="240"/>
+    </vehicle>
+    <vehicle id="1_1" type="0" route="a7" depart="0.10" departLane="1" arrivalLane="1">
+		<stop lane="24771294_1" endPos="1" until="240"/>
+		<stop lane="24771295_1" endPos="1" until="240"/>
+    </vehicle>
+    <vehicle id="0_2" type="0" route="a7" depart="0.20" departLane="0" arrivalLane="0">
+		<stop lane="24771294_0" endPos="1" until="240"/>
+		<stop lane="24771295_0" endPos="1" until="240"/>
+    </vehicle>
+    <vehicle id="1_2" type="0" route="a7" depart="0.20" departLane="1" arrivalLane="1">
+		<stop lane="24771294_1" endPos="1" until="240"/>
+		<stop lane="24771295_1" endPos="1" until="240"/>
+    </vehicle>
+    <vehicle id="0_3" type="0" route="a7" depart="0.30" departLane="0" arrivalLane="0">
+		<stop lane="24771294_0" endPos="1" until="240"/>
+		<stop lane="24771295_0" endPos="1" until="240"/>
+    </vehicle>
+    <vehicle id="1_3" type="0" route="a7" depart="0.30" departLane="1" arrivalLane="1">
+		<stop lane="24771294_1" endPos="1" until="240"/>
+		<stop lane="24771295_1" endPos="1" until="240"/>
+    </vehicle>
+    <vehicle id="0_4" type="0" route="a7" depart="0.40" departLane="0" arrivalLane="0">
+		<stop lane="24771294_0" endPos="1" until="240"/>
+		<stop lane="24771295_0" endPos="1" until="240"/>
+    </vehicle>
+    <vehicle id="1_4" type="0"  route="a7" depart="0.40" departLane="1" arrivalLane="1">
+		<stop lane="24771294_1" endPos="1" until="240"/>
+		<stop lane="24771295_1" endPos="1" until="240"/>
+    </vehicle>
+	
+
+   	<vType id="2" length="5.00" maxSpeed="25.00" color="red">
+        <carFollowing-Krauss accel="1.2" decel="5.50" sigma="0.90"/>
+    </vType>
+    <vehicle id="LaFerrari" type="2" route="a7" depart="150.00" departLane="1" arrivalLane="1">
+    </vehicle>
+	<flow id="ff0" type="5" route="a7" departLane="0" arrivalLane="0" begin="151.00" period="0.05" number="50"/>
+	<flow id="ff1" type="4" route="a7" departLane="1" arrivalLane="1" begin="151.00" period="0.05" number="40"/>
+	-->
+</routes>
+

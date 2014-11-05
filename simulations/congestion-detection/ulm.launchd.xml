@@ -1,0 +1,8 @@
+<?xml version="1.0"?>
+<!-- debug config -->
+<launch>
+	<copy file="ulm.net.xml" />
+	<copy file="a7_lang.rou.xml" />
+	<copy file="ulm.sumo.cfg" type="config" />
+</launch>
+
