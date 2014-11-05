@@ -65,3 +65,18 @@ For command line execution (e.g., simulation server), replace the last line with
 ```sh
 ./run -u Cmdenv -c "CONFIG"
 ```
+
+### Creating a new simulation
+Use `./createsim my-sim` to create a simulation (or refer to the `createsim` script), which copies certain configuration files and scripts from `./examples/veins`. If you want to use TraCI for mobility, you can also copy `./examples/veins/erlangen.*` to have an initial configuration for SUMO. 
+
+#### omnetpp.ini
+This is the central configuration file for OMNeT++. Here you can define simulation types, control parameters passed to NED files and so on. You can use this to vary the number of nodes or parameterize your algorithms. Be sure to read this file thoroughly and [check out the OMNeT++ documentation](http://www.omnetpp.org/doc/omnetpp/manual/usman.html#sec329) for more information regarding the syntax.
+
+The simulation is organized hierarchically (in this case the `RSUExampleScenario` being the root), which means that you will configure the different nodes and their components using a tree-like structure. All parameters given directly to OMNeT++ (such as `network=..`) are on the top layer, while parameters for VEINS components are typically defined indirectly, such as the size of the simulated area: `*.playgroundSizeX`. Definitions that apply to different types of nodes can be matched with `**`, for example; `***.nic....` configures the network interfaces of any node. Finally, you can configure specific nodes by hand using `*.rsu[0]...` (to configure the 0th RSU node), and all nodes using `*.rsu[*]....`.
+
+#### RSUExampleScenario.ned
+This is the example scenario defined for the VEINS demo. It shows how to build your Scenario as a NED file by extending the standard scenario (`./src/nodes/Scenario.ned`). In this case, the only change is the addition of an RSU. If you check out the super-class, you'll find (for example) how playground size (= size of the simulated area) is configured.
+
+
+#### config.xml
+In `config.xml`, you can define 

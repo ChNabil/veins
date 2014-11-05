@@ -1,0 +1,15 @@
+#!/bin/sh
+
+if [ -z "$1" ]; then
+    echo "please provide a name: ./createsim my-custom-simulation-name"
+fi 
+
+TARGET="./simulations/$1"
+mkdir -p "$TARGET"
+cp ./examples/veins/config.xml "$TARGET"
+cp ./examples/veins/debug "$TARGET"
+cp ./examples/veins/memcheck "$TARGET"
+cp ./examples/veins/omnetpp.ini "$TARGET"
+cp ./examples/veins/README "$TARGET"
+cp ./examples/veins/RSUExampleScenario.ned "$TARGET"
+cp ./examples/veins/run "$TARGET"
