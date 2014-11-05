@@ -105,6 +105,7 @@ void TraCIMobility::initialize(int stage)
 		WATCH(road_id);
 		WATCH(speed);
 		WATCH(angle);
+		EV << "TCIM Init";
 
 		isParking = false;
 
@@ -180,6 +181,7 @@ void TraCIMobility::preInitialize(std::string external_id, const Coord& position
 	isPreInitialized = true;
 }
 
+
 void TraCIMobility::nextPosition(const Coord& position, std::string road_id, double speed, double angle, TraCIScenarioManager::VehicleSignal signals)
 {
 	if (debug) EV << "nextPosition " << position.x << " " << position.y << " " << road_id << " " << speed << " " << angle << std::endl;
@@ -195,6 +197,7 @@ void TraCIMobility::nextPosition(const Coord& position, std::string road_id, dou
 
 void TraCIMobility::changePosition()
 {
+	EV << "TraCI Change Position\n";
 	// ensure we're not called twice in one time step
 	ASSERT(lastUpdate != simTime());
 
@@ -236,6 +239,12 @@ void TraCIMobility::changePosition()
 	move.setSpeed(speed);
 	if (ev.isGUI()) updateDisplayString();
 	fixIfHostGetsOutside();
+	/////////////////////////////////////////////////////////////////////////////
+
+	EV <<"Daten von: "<< mod_id << " Speed = " << move.getSpeed() << " X: " << move.getCurrentPosition().x << " Y: "<< move.getCurrentPosition().y << " angle in degree: "<< angle <<  " Simtime: "<< simTime()<< " \n";
+
+	/////////////////////////////////////////////////////////////////////////////
+
 	updatePosition();
 }
 void TraCIMobility::changeParkingState(bool newState)

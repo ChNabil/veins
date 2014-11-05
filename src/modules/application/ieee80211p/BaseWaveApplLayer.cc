@@ -1,4 +1,4 @@
-//
+// Updated by Julian Schregle
 // Copyright (C) 2011 David Eckhoff <eckhoff@cs.fau.de>
 //
 // Documentation for these modules is at http://veins.car2x.org/
@@ -19,10 +19,12 @@
 //
 
 #include "BaseWaveApplLayer.h"
+#include <string>
+Define_Module(BaseWaveApplLayer);
 
 const simsignalwrap_t BaseWaveApplLayer::mobilityStateChangedSignal = simsignalwrap_t(MIXIM_SIGNAL_MOBILITY_CHANGE_NAME);
 
-void BaseWaveApplLayer::initialize(int stage) {
+void BaseWaveApplLayer::initialize(int stage) {								//modified
 	BaseApplLayer::initialize(stage);
 
 	if (stage==0) {
@@ -50,15 +52,30 @@ void BaseWaveApplLayer::initialize(int stage) {
 		offSet = offSet + floor(offSet/0.050)*0.050;
 		individualOffset = dblrand() * maxOffset;
 
+		beaconData = "0,0,0,0,0"; //ID, Direction, Loc_x, Loc_y, speed
+
 		findHost()->subscribe(mobilityStateChangedSignal, this);
 
 		if (sendBeacons) {
 			scheduleAt(simTime() + offSet, sendBeaconEvt);
 		}
+		warning = new cMessage("Warning");
+		if(myId == 0 && sendData && !sendBeacons)
+		{
+
+			scheduleAt(simTime()+152, warning );
+		}
 
 	}
 }
 
+void BaseWaveApplLayer::onData(WaveShortMessage* wsm){	};
+void BaseWaveApplLayer::onBeacon(WaveShortMessage* wsm){	};
+
+void BaseWaveApplLayer::setBeaconData(std::string bData)
+{
+	beaconData = bData;
+}
 WaveShortMessage*  BaseWaveApplLayer::prepareWSM(std::string name, int lengthBits, t_channel channel, int priority, int rcvId, int serial) {
 	WaveShortMessage* wsm =		new WaveShortMessage(name.c_str());
 	wsm->addBitLength(headerLength);
@@ -116,10 +133,27 @@ void BaseWaveApplLayer::handleLowerMsg(cMessage* msg) {
 	delete(msg);
 }
 
-void BaseWaveApplLayer::handleSelfMsg(cMessage* msg) {
+void BaseWaveApplLayer::handleSelfMsg(cMessage* msg) {												//modified
+
+	if(msg == warning)
+	{
+		std::stringstream message_text;
+		message_text << "<" << "2" << "," << "11795.5" << "," << "6818.8"
+				<< "," << simTime().str() << "," << "7.45" << ">";
+		t_channel channel = dataOnSch ? type_SCH : type_CCH;
+		WaveShortMessage* wsm = prepareWSM("data", dataLengthBits, channel,
+				dataPriority, -1, 2);
+		wsm->setWsmData(message_text.str().c_str());
+		sendWSM(wsm);
+		EV << "\n\n\n\n "<< message_text << " warning has been send!! \n\n\n";
+
+	}
+
 	switch (msg->getKind()) {
 		case SEND_BEACON_EVT: {
-			sendWSM(prepareWSM("beacon", beaconLengthBits, type_CCH, beaconPriority, 0, -1));
+			WaveShortMessage *wsm = prepareWSM("beacon", beaconLengthBits, type_CCH, beaconPriority, 0, -1);
+			wsm->setWsmData(beaconData.c_str());
+			sendWSM(wsm);
 			scheduleAt(simTime() + par("beaconInterval").doubleValue(), sendBeaconEvt);
 			break;
 		}

@@ -27,6 +27,7 @@
 #include <WaveShortMessage_m.h>
 #include "base/connectionManager/ChannelAccess.h"
 #include <WaveAppToMac1609_4Interface.h>
+#include <string>
 
 #ifndef DBG
 #define DBG EV
@@ -71,10 +72,11 @@ class BaseWaveApplLayer : public BaseApplLayer {
 
 		virtual WaveShortMessage* prepareWSM(std::string name, int dataLengthBits, t_channel channel, int priority, int rcvId, int serial=0);
 		virtual void sendWSM(WaveShortMessage* wsm);
-		virtual void onBeacon(WaveShortMessage* wsm) = 0;
-		virtual void onData(WaveShortMessage* wsm) = 0;
+		virtual void onBeacon(WaveShortMessage* wsm);
+		virtual void onData(WaveShortMessage* wsm);
 
 		virtual void handlePositionUpdate(cObject* obj);
+		virtual void setBeaconData(std::string bData);					//modified
 
 	protected:
 		int beaconLengthBits;
@@ -88,8 +90,10 @@ class BaseWaveApplLayer : public BaseApplLayer {
 		Coord curPosition;
 		int mySCH;
 		int myId;
+		std::string beaconData;										//modified
 
 		cMessage* sendBeaconEvt;
+		cMessage* warning;
 
 		WaveAppToMac1609_4Interface* myMac;
 };

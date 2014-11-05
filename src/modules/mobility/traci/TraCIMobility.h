@@ -107,6 +107,10 @@ class TraCIMobility : public BaseMobility
 			if (signals == -1) throw cRuntimeError("TraCIMobility::getSignals called with no signals set yet");
 			return signals;
 		}
+
+		virtual double getCurrentSpeed(){
+			return move.getSpeed();
+		}
 		/**
 		 * returns angle in rads, 0 being east, with -M_PI <= angle < M_PI.
 		 */
@@ -207,7 +211,11 @@ class TraCIMobility : public BaseMobility
 
 		bool isParking;
 
+		////////////////////////////////////////////////////////////////////////////////////////////////////////
+		//Congestion detection Car parameter
+		///////////////////////////////////////////////////////////////////////////////////////////////////////
 
+		////////////////////////////////////////////////////////////////////////////////////////////////////////
 		virtual void fixIfHostGetsOutside(); /**< called after each read to check for (and handle) invalid positions */
 
 		/**
