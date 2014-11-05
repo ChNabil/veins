@@ -1,0 +1,6 @@
+#!/bin/sh
+if [ -n "$SUMO" ]; then
+        python2 ../../sumo-launchd.py -dc "$SUMO" "$@"
+else
+        echo "Please tell me where sumo is using the SUMO variable"
+fi
