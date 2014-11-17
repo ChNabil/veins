@@ -89,7 +89,7 @@ Situation: your code compiles, but trying to run it with OMNeT++ causes errors s
 `<!> Warning: opp_run: Cannot check library ../../src/veins: ../../src//libveins.so: undefined symbol: _ZN6LDMApp10prepareWSMESsi9t_channeliii`  
 `<!> Error during startup: Cannot load library '../../src//libveins.so': ../../src//libveins.so: undefined symbol: _ZN6LDMApp10prepareWSMESsi9t_channeliii.`  
 The relevant C++ code for this case is:
-```cplusplus
+```cpp
 class LDMApp : public BaseWaveApplLayer {
 //...
 virtual WaveShortMessage* prepareWSM(std::string name, int dataLengthBits, t_channel channle, int priority, int rcvId, int serial=0) override;
@@ -97,3 +97,12 @@ virtual WaveShortMessage* prepareWSM(std::string name, int dataLengthBits, t_cha
 }
 ```
 Which should override the standard VEINS method `BaseWaveApplLayer::prepareWSM`. Note that the `override` here is a C++11 feature (which works as expected with a current g++ compiler -- it checks that something is actually overridden; if not, it will provide an error). What happened in this particular case is that the implementation of the class `LDMApp` did not have an implementation of the specified virtual method, `prepareWSM`. Unlike what you might expect, this is **not** checked by the compiler.
+
+### Cannot access fields from `.msg`-generated type
+If you try to access a field in a Message type that was specified using the OMNeT++ `.msg` file type (See [message definitions](http://www.omnetpp.org/doc/omnetpp/manual/usman.html#sec224) in the OMNeT++ user manual) as follows (the message type is defined [here](src/modules/messages/WaveShortMessage.msg)), it will not work:
+```cpp
+void LDMApp::onBeacon(WaveShortMessage * wsm){ 
+        do_things(wsm->senderAddress);
+}
+```
+This is intentional -- `opp_msgc` creates getters and setters for each of the variables in the message spec, and renames them to discourage direct access to these values. You should use `getSenderAddress` (in this case) to access the variables.
