@@ -74,8 +74,8 @@ class LDMApp : public BaseWaveApplLayer {
 
                 //reception method for beacons -- override when message type is different
 		virtual void onBeacon(WaveShortMessage * wsm) override;
-                //overrides BaseWaveApplLayer::prepareWSM
-                virtual WaveShortMessage* prepareWSM(std::string name, int dataLengthBits, t_channel channle, int priority, int rcvId, int serial=0) override;
+                //overrides BaseWaveApplLayer::prepareWSM -- not yet implemented.
+                //virtual WaveShortMessage* prepareWSM(std::string name, int dataLengthBits, t_channel channle, int priority, int rcvId, int serial=0) override;
                 //overrides BaseWaveApplLayer::handlePositionUpdate
                 virtual void handlePositionUpdate( cObject * obj) override;
                 //overrides BaseWaveApplLayer::handleLowerMsg

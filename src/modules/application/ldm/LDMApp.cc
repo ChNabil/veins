@@ -20,14 +20,25 @@
 
 #include "LDMApp.h"
 
-void LDMApp::initialize(int stage) {
-	BaseWaveApplLayer::initialize(stage);
+/* 
+   *********************** LDMApp methods ****************************
+*/
+
+const LDMEntry& LDMApp::fetchFromLDM(const int sender) const{
+        return ldm.at(sender);
+}
+
+void LDMApp::storeInLDM(const int sender, LDMEntry& data){
+        ldm[sender]=data;
 }
 
 
-void LDMApp::handlePositionUpdate(cObject * obj) {
-        BaseWaveApplLayer::handlePositionUpdate(obj);
-        //storeInLDM(SELF, updatedEntry);
+/* 
+   **************** Overridden methods *******************
+*/
+
+void LDMApp::initialize(int stage) {
+	BaseWaveApplLayer::initialize(stage);
 }
 
 void LDMApp::handleLowerMsg(cMessage * msg) {
@@ -61,20 +72,17 @@ void LDMApp::handleSelfMsg(cMessage * msg) {
 	}
 }
 
+void LDMApp::handlePositionUpdate(cObject * obj) {
+        BaseWaveApplLayer::handlePositionUpdate(obj);
+        //storeInLDM(SELF, updatedEntry);
+}
+
 void LDMApp::onBeacon(WaveShortMessage * wsm){
         LDMEntry* data = new LDMEntry();
         //data->pos=;
         //data->speed=;
         //data->time=currentTime;
         storeInLDM(wsm->getSenderAddress(), *data);
-}
-
-const LDMEntry& LDMApp::fetchFromLDM(const int sender) const{
-        return ldm.at(sender);
-}
-
-void LDMApp::storeInLDM(const int sender, LDMEntry& data){
-        ldm[sender]=data;
 }
 
 void LDMApp::finish() {
