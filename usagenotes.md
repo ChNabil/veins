@@ -108,3 +108,16 @@ void LDMApp::onBeacon(WaveShortMessage * wsm){
 }
 ```
 This is intentional -- `opp_msgc` creates getters and setters for each of the variables in the message spec, and renames them to discourage direct access to these values. You should use `getSenderAddress` (in this case) to access the variables.
+
+### Module interfaces
+If you encounter the following error:
+```
+Error: base type org.car2x.veins.modules.application.ieee80211p.BaseWaveApplLayer is expected to be a module interface, at .../src/modules/application/ldm/LDMApp.ned:35.
+```
+Then you tried to use the `like` keyword to extend (in this example) [BaseWaveApplLayer](src/modules/application/ieee802.11p/BaseWaveApplLayer.ned) with something like this code:
+```
+simple LDMApp like BaseWaveApplLayer
+{
+}
+```
+You should use the `extends` keyword.
