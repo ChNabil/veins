@@ -82,7 +82,7 @@ This is the example scenario defined for the VEINS demo. It shows how to build y
 
 
 #### config.xml
-In `config.xml`, you can define 
+In `config.xml`, you can define certain parameters of VEINS' default NIC here, including the selected path loss model.
 
 ## Errors
 Sometimes, gcc/opp error messages are less than clear. These are the messages I've encountered problems with. 
