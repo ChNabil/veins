@@ -86,8 +86,10 @@ Sometimes, gcc/opp error messages are less than clear. These are the messages I'
 
 ### Missing symbols
 Situation: your code compiles, but trying to run it with OMNeT++ causes errors similar to the following:  
-`<!> Warning: opp_run: Cannot check library ../../src/veins: ../../src//libveins.so: undefined symbol: _ZN6LDMApp10prepareWSMESsi9t_channeliii`  
-`<!> Error during startup: Cannot load library '../../src//libveins.so': ../../src//libveins.so: undefined symbol: _ZN6LDMApp10prepareWSMESsi9t_channeliii.`  
+```
+<!> Warning: opp_run: Cannot check library ../../src/veins: ../../src//libveins.so: undefined symbol: _ZN6LDMApp10prepareWSMESsi9t_channeliii
+<!> Error during startup: Cannot load library '../../src//libveins.so': ../../src//libveins.so: undefined symbol: _ZN6LDMApp10prepareWSMESsi9t_channeliii.
+```
 The relevant C++ code for this case is:
 ```cpp
 class LDMApp : public BaseWaveApplLayer {
