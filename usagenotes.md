@@ -80,3 +80,20 @@ This is the example scenario defined for the VEINS demo. It shows how to build y
 
 #### config.xml
 In `config.xml`, you can define 
+
+## Errors
+Sometimes, gcc/opp error messages are less than clear. These are the messages I've encountered problems with. 
+
+### Missing symbols
+Situation: your code compiles, but trying to run it with OMNeT++ causes errors similar to the following:  
+`<!> Warning: opp_run: Cannot check library ../../src/veins: ../../src//libveins.so: undefined symbol: _ZN6LDMApp10prepareWSMESsi9t_channeliii`  
+`<!> Error during startup: Cannot load library '../../src//libveins.so': ../../src//libveins.so: undefined symbol: _ZN6LDMApp10prepareWSMESsi9t_channeliii.`  
+The relevant C++ code for this case is:
+```cplusplus
+class LDMApp : public BaseWaveApplLayer {
+//...
+virtual WaveShortMessage* prepareWSM(std::string name, int dataLengthBits, t_channel channle, int priority, int rcvId, int serial=0) override;
+//...
+}
+```
+Which should override the standard VEINS method `BaseWaveApplLayer::prepareWSM`. Note that the `override` here is a C++11 feature (which works as expected with a current g++ compiler -- it checks that something is actually overridden; if not, it will provide an error). What happened in this particular case is that the implementation of the class `LDMApp` did not have an implementation of the specified virtual method, `prepareWSM`. Unlike what you might expect, this is **not** checked by the compiler.
