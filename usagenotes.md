@@ -67,7 +67,10 @@ For command line execution (e.g., simulation server), replace the last line with
 ```
 
 ### Creating a new simulation
-Use `./createsim my-sim` to create a simulation (or refer to the `createsim` script), which copies certain configuration files and scripts from `./examples/veins`. If you want to use TraCI for mobility, you can also copy `./examples/veins/erlangen.*` to have an initial configuration for SUMO. 
+Use `./createsim my-sim` to create a simulation (or refer to the `createsim` script), which copies certain configuration files and scripts from `./examples/veins`. It also creates symbolic links to the relevant map and configuration files for SUMO. Of course, you can remove these and use your own SUMO configurations (make sure to update the OMNeT++ configuration). Just update this line in `omnetpp.ini` (see also the explanation below) to your .launchd.xml file:
+```
+*.manager.launchConfig = xmldoc("erlangen.launchd.xml")
+```
 
 #### omnetpp.ini
 This is the central configuration file for OMNeT++. Here you can define simulation types, control parameters passed to NED files and so on. You can use this to vary the number of nodes or parameterize your algorithms. Be sure to read this file thoroughly and [check out the OMNeT++ documentation](http://www.omnetpp.org/doc/omnetpp/manual/usman.html#sec329) for more information regarding the syntax.
