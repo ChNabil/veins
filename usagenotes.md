@@ -39,9 +39,11 @@ The following are some important files; read this to understand how the veins re
 
 ## File types and conventions
 ### NED files
-OMNeT++ files that say how classes are tied together. Typically associated with .cc and .h files of the same name. See OMNeT++ docu for more info.
+OMNeT++ files that say how classes are tied together. Typically associated with .cc and .h files of the same name. See OMNeT++ docu for more info. For vim users: there is a syntax file [here](https://github.com/vim-scripts/OMNeTpp4.x-NED-Syntax-file); if you've never installed a vim syntax file, refer to [the documentation](http://vimdoc.sourceforge.net/htmldoc/syntax.html#:syn-files).
+
 ### MSG files
-OMNeT++ messages. C++ code is generated from these files. `cplusplus{{}}` blocks are used to add custom code.
+OMNeT++ messages. C++ code is generated from these files. `cplusplus{{}}` blocks are used to add custom code. For vim users: there is a syntax file for NEDs [here](https://github.com/vim-scripts/OMNeTpp4.x-NED-Syntax-file), which also works for MSGs; if you've never installed a vim syntax file, refer to [the documentation](http://vimdoc.sourceforge.net/htmldoc/syntax.html#:syn-files).
+
 ### simulation configuration
 As with the `/examples/veins` directory, it is recommended to separate configuration from code.
 
