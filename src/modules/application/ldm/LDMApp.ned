@@ -32,6 +32,6 @@ import org.car2x.veins.base.modules.IBaseApplLayer;
 // @see Mac1609_4
 // @see PhyLayer80211p
 //
-simple LDMApp like BaseWaveApplLayer
+simple LDMApp extends BaseWaveApplLayer
 {
 }
