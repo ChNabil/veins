@@ -2,14 +2,25 @@
 
 if [ -z "$1" ]; then
     echo "please provide a name: ./createsim my-custom-simulation-name"
+    exit
 fi 
 
 TARGET="./simulations/$1"
 mkdir -p "$TARGET"
+#the default config
 cp ./examples/veins/config.xml "$TARGET"
+cp ./examples/veins/omnetpp.ini "$TARGET"
+#the default scenario file
+cp ./examples/veins/RSUExampleScenario.ned "$TARGET"
+#the debug, memcheck and run scripts
 cp ./examples/veins/debug "$TARGET"
 cp ./examples/veins/memcheck "$TARGET"
-cp ./examples/veins/omnetpp.ini "$TARGET"
-cp ./examples/veins/README "$TARGET"
-cp ./examples/veins/RSUExampleScenario.ned "$TARGET"
 cp ./examples/veins/run "$TARGET"
+#the readme of the example
+cp ./examples/veins/README "$TARGET"
+#symlinks for the SUMO configuration, since those files should not be modified anyway
+ln -s "$PWD/examples/veins/erlangen.launchd.xml" "$TARGET/erlangen.launchd.xml"
+ln -s "$PWD/examples/veins/erlangen.net.xml" "$TARGET/erlangen.net.xml"
+ln -s "$PWD/examples/veins/erlangen.rou.xml" "$TARGET/erlangen.rou.xml"
+ln -s "$PWD/examples/veins/erlangen.poly.xml" "$TARGET/erlangen.poly.xml"
+ln -s "$PWD/examples/veins/erlangen.sumo.cfg" "$TARGET/erlangen.sumo.cfg"
