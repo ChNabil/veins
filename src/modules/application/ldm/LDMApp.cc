@@ -20,7 +20,11 @@
 
 #include "LDMApp.h"
 
+using Veins::TraCIMobilityAccess;
+using Veins::AnnotationManagerAccess;
+
 Define_Module(LDMApp);
+
 
 /* 
    *********************** LDMApp methods ****************************
@@ -41,6 +45,17 @@ void LDMApp::storeInLDM(const int sender, LDMEntry& data) {
 
 void LDMApp::initialize(int stage) {
 	BaseWaveApplLayer::initialize(stage);
+	if (stage == 0) {
+		traci = TraCIMobilityAccess().get(getParentModule());
+		annotations = AnnotationManagerAccess().getIfExists();
+		ASSERT(annotations);
+
+		sentMessage = false;
+		lastDroveAt = simTime();
+		//findHost()->subscribe(parkingStateChangedSignal, this);
+		isParking = false;
+		sendWhileParking = par("sendWhileParking").boolValue();
+	}
 }
 
 void LDMApp::handleLowerMsg(cMessage * msg) {
@@ -78,6 +93,19 @@ void LDMApp::handleSelfMsg(cMessage * msg) {
 void LDMApp::handlePositionUpdate(cObject * obj) {
         BaseWaveApplLayer::handlePositionUpdate(obj);
         //storeInLDM(SELF, updatedEntry);
+
+        //code from the TraCIDemo11p:
+	// stopped for for at least 10s?
+	if (traci->getSpeed() < 1) {
+		if (simTime() - lastDroveAt >= 10) {
+                        // visualize that the car is stopped
+			findHost()->getDisplayString().updateWith("r=16,red");
+		}
+	}
+	else {
+		lastDroveAt = simTime();
+	}
+        //end of code from the TraCIDemo11p
 }
 
 void LDMApp::onBeacon(WaveShortMessage * wsm) {
@@ -108,9 +136,32 @@ void LDMApp::finish() {
 }
 
 void LDMApp::onData(WaveShortMessage* wsm) {
-        //do not do anything with data packets.
+	//Code from TraCIDemo11p
+	findHost()->getDisplayString().updateWith("r=16,green");
+	annotations->scheduleErase(1, annotations->drawLine(wsm->getSenderPos(), traci->getPositionAt(simTime()), "blue"));
+
+	if (traci->getRoadId()[0] != ':') traci->commandChangeRoute(wsm->getWsmData(), 9999);
+	if (!sentMessage) sendMessage(wsm->getWsmData());
+	//end code from TraCIDemo11p
+
 }
 
 LDMApp::~LDMApp() {
 
+}
+
+
+//CODE BEYOND THIS LINE IS FROM TraCIDemo11p!!!!
+
+void LDMApp::sendMessage(std::string blockedRoadId) {
+        sentMessage = true;
+
+        t_channel channel = dataOnSch ? type_SCH : type_CCH;
+        WaveShortMessage* wsm = prepareWSM("data", dataLengthBits, channel, dataPriority, -1,2);        wsm->setWsmData(blockedRoadId.c_str());
+        sendWSM(wsm);
+}
+
+void LDMApp::sendWSM(WaveShortMessage* wsm) {
+	if (isParking && !sendWhileParking) return;
+	sendDelayedDown(wsm,individualOffset);
 }

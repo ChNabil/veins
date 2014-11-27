@@ -21,19 +21,23 @@
 #ifndef LDMAPP_H_
 #define LDMAPP_H_
 
+#include "BaseWaveApplLayer.h"
 #include <map>
 #include <BaseApplLayer.h>
-#include <BaseWaveApplLayer.h>
 #include <Consts80211p.h>
 #include <WaveShortMessage_m.h>
 #include "Coord.h"
 #include "base/connectionManager/ChannelAccess.h"
 #include <WaveAppToMac1609_4Interface.h>
+#include "modules/mobility/traci/TraCIMobility.h"
+
+using Veins::TraCIMobility;
+using Veins::AnnotationManager;
 
 #ifndef DBG
 #define DBG EV
+//#define DBG (ev.isDisabled()||!debug) ? ev : ev << "[" << simTime().raw() << "] " << getParentModule()->getFullPath() << " "
 #endif
-//#define DBG std::cerr << "[" << simTime().raw() << "] " << getParentModule()->getFullPath() << " "
 
 
 /**
@@ -54,6 +58,7 @@ struct LDMEntry {
  *
  * @ingroup ldm
  *
+ * @see TraCIDemo11p
  * @see BaseWaveApplLayer
  * @see Mac1609_4
  * @see PhyLayer80211p
@@ -65,6 +70,17 @@ class LDMApp : public BaseWaveApplLayer {
 		~LDMApp();
 		virtual void initialize(int stage);
 		virtual void finish();
+
+	protected:
+		TraCIMobility* traci;
+		AnnotationManager* annotations;
+		simtime_t lastDroveAt;
+		bool sentMessage;
+		bool isParking;
+		bool sendWhileParking;
+                //maps addresses to their respective LDM entries.
+                std::map<int,LDMEntry> ldm;
+
 
 	protected:
                 //storage method -- override to add tests etc.
@@ -85,9 +101,10 @@ class LDMApp : public BaseWaveApplLayer {
                 //
                 virtual void onData(WaveShortMessage* wsm) override;
 
-	protected:
-                //maps addresses to their respective LDM entries.
-                std::map<int,LDMEntry> ldm;
+                // from TraCIDemo11p:
+                //wrapper that sends a message of type "data":
+		void sendMessage(std::string blockedRoadId);
+		virtual void sendWSM(WaveShortMessage* wsm);
 };
 
 #endif /* LDMAPP_H_ */
