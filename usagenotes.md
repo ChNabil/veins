@@ -126,3 +126,36 @@ simple LDMApp like BaseWaveApplLayer
 }
 ```
 You should use the `extends` keyword.
+
+### C++11 features
+See [this blog post](http://adamcavendish.is-programmer.com/posts/42316.html). A correct `Makefile.inc` is included in the root of this repository. 
+
+### Check consistency between `omnetpp.ini` and your `.ned` files
+Remember that OMNeT++ will/can not verify that all properties in your `omnetpp.ini` exist. The opposite is often true if you inherit from existing code -- for most application `.ned` files, defaults are set, and these may interact with your `omnetpp.ini`. For example, you might set your implementation of `org.car2x.veins.base.mdoules.IBaseApplLayer`'s `dataOnSch` to `true`, while your `org.car2x.veins.modules.mac.iee80211p.Mac1609_4` has its `useServiceChannel` set to `false`. This will lead to potentially confusing assertion errors!
+
+## Debugging
+There are many ways to debug your VEINS application, and many of them can be combined to get to your problem the fastest way. This section is a (mosty likely) incomplete description of the available options.
+
+Further reading:
+ * [OMNeT++ Wiki -- C++ debugging tips](http://www.omnetpp.org/pmwiki/index.php?n=Main.CplusplusDebuggingTips)
+ * [GDB Manual](http://davis.lbl.gov/Manuals/GDB/gdb.html)
+ * [brief GDB overview](http://phoenix.goucher.edu/~kelliher/cs318/gdb.html)
+
+### Using `gdb` or another generic debugger
+If you are familiar with C/C++ programming on Linux systems, you'll probably want to use your favorite debugger with OMNeT++ too. In fact, the `./debug` script included with VEINS uses `gdb` by default (which you can change by replacing it in the python script). You can even combine it with the Tkenv GUI: the OMNeT++ simulator allows you to jump to the debugger for the next event using a menu option. Additionally, if you set the option `debug-on-errors` in `omnetpp.ini` to `true`, you will end up in a debugger if an error (such as an assertion failure or another unhandled exception) is thrown.
+
+In `gdb`'s debug shell, you can do the usual operations; refer to a gdb introduction if you are not familiar with these. Of particular use are the commands `bt full`, `frame`, `print` and `break` (brief descriptions are available using `help command`). 
+
+### Using `ev<<` and the OMNeT++ GUI
+
+At every point in your code, you can write to the `ev` file pointer. As demonstrated by some VEINS source code, it is helpful to create a macro to improve the readability of the log, like so:
+```cpp
+#define deciderEV (ev.isDisabled()||!debug) ? ev : ev << "[Host " << myIndex << "] - PhyLayer(Decider): "
+```
+As you'll notice, there are several variables in `omnetpp.ini` that influence debugging through these macros:
+```
+**.debug = true
+**.coreDebug = true
+*.annotations.draw = true
+```
+To debug applications, you should use the `debug` option. `*.annotations.draw` draws objects from SUMO into your GUI. This significantly slows down your simulations, so unless you're working with something like ray tracing you probably want to turn this feature off.
