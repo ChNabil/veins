@@ -2,4 +2,9 @@
 // Documentation for these modules is at http://veins.car2x.org/
 //
 
-Note that these modifications make use of C++11.
+These extensions use C++11 features.
+
+Used C++11 features:
+ * override
+ * std::map::at
+ * auto
