@@ -79,25 +79,25 @@ class LDMApp : public BaseWaveApplLayer {
 		bool isParking;
 		bool sendWhileParking;
                 //maps addresses to their respective LDM entries.
-                std::map<int,LDMEntry> ldm;
+                std::map<int,LDMEntry*> ldm;
 
 
 	protected:
                 //storage method -- override to add tests etc.
-		virtual void storeInLDM(const int sender, LDMEntry& data);
+		virtual void storeInLDM(const int sender, LDMEntry* data);
                 //retrieval method
-                virtual const LDMEntry& fetchFromLDM(const int sender) const;
+                virtual const LDMEntry* fetchFromLDM(const int sender) const;
 
                 //reception method for beacons -- override when message type is different
 		virtual void onBeacon(WaveShortMessage * wsm) override;
                 //overrides BaseWaveApplLayer::prepareWSM -- not yet implemented.
                 //virtual WaveShortMessage* prepareWSM(std::string name, int dataLengthBits, t_channel channle, int priority, int rcvId, int serial=0) override;
                 //overrides BaseWaveApplLayer::handlePositionUpdate
-                virtual void handlePositionUpdate( cObject * obj) override;
+                virtual void handlePositionUpdate(cObject* obj) override;
                 //overrides BaseWaveApplLayer::handleLowerMsg
-                virtual void handleLowerMsg(cMessage * msg) override;
+                virtual void handleLowerMsg(cMessage* msg) override;
                 //overrides BaseWaveApplLayer::handleSelfMsg
-                virtual void handleSelfMsg(cMessage * msg) override;
+                virtual void handleSelfMsg(cMessage* msg) override;
                 //
                 virtual void onData(WaveShortMessage* wsm) override;
 

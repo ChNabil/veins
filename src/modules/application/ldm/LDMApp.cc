@@ -30,11 +30,11 @@ Define_Module(LDMApp);
    *********************** LDMApp methods ****************************
 */
 
-const LDMEntry& LDMApp::fetchFromLDM(const int sender) const {
+const LDMEntry* LDMApp::fetchFromLDM(const int sender) const {
         return ldm.at(sender);
 }
 
-void LDMApp::storeInLDM(const int sender, LDMEntry& data) {
+void LDMApp::storeInLDM(const int sender, LDMEntry* data) {
         ldm[sender]=data;
 }
 
@@ -58,7 +58,7 @@ void LDMApp::initialize(int stage) {
 	}
 }
 
-void LDMApp::handleLowerMsg(cMessage * msg) {
+void LDMApp::handleLowerMsg(cMessage* msg) {
 	WaveShortMessage* wsm = dynamic_cast<WaveShortMessage*>(msg);
 	ASSERT(wsm);
 
@@ -72,7 +72,7 @@ void LDMApp::handleLowerMsg(cMessage * msg) {
 	delete(msg);
 }
 
-void LDMApp::handleSelfMsg(cMessage * msg) {
+void LDMApp::handleSelfMsg(cMessage* msg) {
 	switch (msg->getKind()) {
 		case SEND_BEACON_EVT: {
                         WaveShortMessage* wsm = prepareWSM("beacon", beaconLengthBits, type_CCH, beaconPriority, 0, -1);
@@ -90,7 +90,7 @@ void LDMApp::handleSelfMsg(cMessage * msg) {
 	}
 }
 
-void LDMApp::handlePositionUpdate(cObject * obj) {
+void LDMApp::handlePositionUpdate(cObject* obj) {
         BaseWaveApplLayer::handlePositionUpdate(obj);
         //storeInLDM(SELF, updatedEntry);
 
@@ -108,12 +108,12 @@ void LDMApp::handlePositionUpdate(cObject * obj) {
         //end of code from the TraCIDemo11p
 }
 
-void LDMApp::onBeacon(WaveShortMessage * wsm) {
+void LDMApp::onBeacon(WaveShortMessage* wsm) {
         LDMEntry* data = new LDMEntry();
         //data->pos=;
         //data->speed=;
         //data->time=currentTime;
-        storeInLDM(wsm->getSenderAddress(), *data);
+        storeInLDM(wsm->getSenderAddress(), data);
 }
 
 void LDMApp::finish() {
@@ -121,18 +121,18 @@ void LDMApp::finish() {
 		cancelAndDelete(sendBeaconEvt);
 	}
 	else {
-		delete sendBeaconEvt;
+		delete(sendBeaconEvt);
 	}
 
 	findHost()->unsubscribe(mobilityStateChangedSignal, this);
         //clean up the LDM
-        for(  std::map<int,LDMEntry>::iterator entry=ldm.begin(); entry!=ldm.end(); ++entry)
+        for(auto entry=ldm.begin(); entry!=ldm.end(); ++entry)
         {
                 //destroy the LDMEntry object
-                delete &(entry->second);
+                delete(entry->second);
         }
         //destroy the map itself
-        delete &(ldm);
+        delete(&ldm);
 }
 
 void LDMApp::onData(WaveShortMessage* wsm) {

@@ -3,3 +3,8 @@
 //
 
 These extensions use C++11 features.
+
+Used C++11 features:
+ * override
+ * std::map::at
+ * auto
