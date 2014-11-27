@@ -20,15 +20,17 @@
 
 #include "LDMApp.h"
 
+Define_Module(LDMApp);
+
 /* 
    *********************** LDMApp methods ****************************
 */
 
-const LDMEntry& LDMApp::fetchFromLDM(const int sender) const{
+const LDMEntry& LDMApp::fetchFromLDM(const int sender) const {
         return ldm.at(sender);
 }
 
-void LDMApp::storeInLDM(const int sender, LDMEntry& data){
+void LDMApp::storeInLDM(const int sender, LDMEntry& data) {
         ldm[sender]=data;
 }
 
@@ -59,6 +61,7 @@ void LDMApp::handleSelfMsg(cMessage * msg) {
 	switch (msg->getKind()) {
 		case SEND_BEACON_EVT: {
                         WaveShortMessage* wsm = prepareWSM("beacon", beaconLengthBits, type_CCH, beaconPriority, 0, -1);
+                        ev << "Created a beacon on channel " << type_CCH << " -- " << wsm << std::endl;
                         //TODO add additional payload to WSM.
 			sendWSM(wsm);
 			scheduleAt(simTime() + par("beaconInterval").doubleValue(), BaseWaveApplLayer::sendBeaconEvt);
@@ -77,7 +80,7 @@ void LDMApp::handlePositionUpdate(cObject * obj) {
         //storeInLDM(SELF, updatedEntry);
 }
 
-void LDMApp::onBeacon(WaveShortMessage * wsm){
+void LDMApp::onBeacon(WaveShortMessage * wsm) {
         LDMEntry* data = new LDMEntry();
         //data->pos=;
         //data->speed=;
@@ -102,6 +105,10 @@ void LDMApp::finish() {
         }
         //destroy the map itself
         delete &(ldm);
+}
+
+void LDMApp::onData(WaveShortMessage* wsm) {
+        //do not do anything with data packets.
 }
 
 LDMApp::~LDMApp() {

@@ -82,6 +82,8 @@ class LDMApp : public BaseWaveApplLayer {
                 virtual void handleLowerMsg(cMessage * msg) override;
                 //overrides BaseWaveApplLayer::handleSelfMsg
                 virtual void handleSelfMsg(cMessage * msg) override;
+                //
+                virtual void onData(WaveShortMessage* wsm) override;
 
 	protected:
                 //maps addresses to their respective LDM entries.
