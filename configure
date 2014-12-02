@@ -62,8 +62,6 @@ f.write('run_libs = %s\n' % repr(run_libs))
 f.write('run_neds = %s\n' % repr(run_neds))
 f.close()
 
-#run with existing environment plus the custom Makefile
-os.environ['OMNETPP_CONFIGFILE'] = os.getcwd() + '/Makefile.inc'
 check_call(['env', 'opp_makemake'] + makemake_flags, cwd='src')
 
 print 'Configure done. You can now run "make".'
