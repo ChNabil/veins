@@ -34,7 +34,8 @@ const LDMEntry* LDMApp::fetchFromLDM(const int sender) const {
         return ldm.at(sender);
 }
 
-void LDMApp::storeInLDM(const int sender, LDMEntry* data) {
+void LDMApp::storeInLDM(const int sender, const LDMEntry const * data) {
+        EV << "Update for " << sender << std::endl;
         ldm[sender]=data;
 }
 
@@ -110,9 +111,11 @@ void LDMApp::handlePositionUpdate(cObject* obj) {
 
 void LDMApp::onBeacon(WaveShortMessage* wsm) {
         LDMEntry* data = new LDMEntry();
-        //data->pos=;
-        //data->speed=;
-        //data->time=currentTime;
+        EV << "Encountered a new beacon from " << wsm->getSenderAddress() << " with intended recipient " << wsm->getRecipientAddress() << " containing the following position: " << wsm->getSenderPos() << " and timestamped at simulation time " << wsm->getTimestamp() << std::endl;
+        Coord c = wsm->getSenderPos(); //call getSenderPos(), use the reference to call the copy constructor of Coord
+        data->pos=c; //store it in LDMEntry
+        data->speed=wsm->getSenderSpeed();
+        data->time=simTime(); // call simTime(), store the result (simtime_t) in the LDMEntry
         storeInLDM(wsm->getSenderAddress(), data);
 }
 

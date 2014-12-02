@@ -45,7 +45,7 @@ using Veins::AnnotationManager;
  * @author Rens van der Heijden
  */
 struct LDMEntry {
-        int time;  //timestamp for the most recent update
+        simtime_t time;  //timestamp for the most recent update
         Coord pos; //most recent position
         int speed; //most recent speed value
         // more data elements can be put here.
