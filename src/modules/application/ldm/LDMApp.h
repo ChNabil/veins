@@ -44,11 +44,35 @@ using Veins::AnnotationManager;
  * @brief description of a single local dynamic map entry.
  * @author Rens van der Heijden
  */
-struct LDMEntry {
+class LDMEntry {
         simtime_t time;  //timestamp for the most recent update
         Coord pos; //most recent position
         int speed; //most recent speed value
         // more data elements can be put here.
+
+        public:
+        LDMEntry(const Coord p, const int v, const simtime_t t){
+                this->pos=p;
+                this->speed=v;
+                this->time=t;
+        }
+        
+        LDMEntry& operator=(const LDMEntry& other){
+                pos=other.pos;
+                speed=other.speed;
+                time=other.time;
+                return *this;
+        }
+        
+        LDMEntry(const LDMEntry& other){
+                this->pos=other.getPosition();
+                this->speed=other.getSpeed();
+                this->time=other.getTime();
+        }
+        
+        simtime_t getTime()const{return time;}
+        Coord getPosition()const{return pos;}
+        int getSpeed()const{return speed;}
 };
 
 /**
@@ -79,14 +103,14 @@ class LDMApp : public BaseWaveApplLayer {
 		bool isParking;
 		bool sendWhileParking;
                 //maps addresses to their respective LDM entries.
-                std::map<int,LDMEntry*> ldm;
+                std::map<int,LDMEntry> ldm;
 
 
 	protected:
                 //storage method -- override to add tests etc.
-		virtual void storeInLDM(const int sender, LDMEntry* data);
+		virtual void storeInLDM(const int& sender, const LDMEntry& data);
                 //retrieval method
-                virtual const LDMEntry* fetchFromLDM(const int sender) const;
+                virtual const LDMEntry fetchFromLDM(const int sender) const;
 
                 //reception method for beacons -- override when message type is different
 		virtual void onBeacon(WaveShortMessage * wsm) override;

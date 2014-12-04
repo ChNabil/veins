@@ -25,18 +25,17 @@ using Veins::AnnotationManagerAccess;
 
 Define_Module(LDMApp);
 
-
 /* 
    *********************** LDMApp methods ****************************
 */
 
-const LDMEntry* LDMApp::fetchFromLDM(const int sender) const {
+const LDMEntry LDMApp::fetchFromLDM(const int sender) const {
         return ldm.at(sender);
 }
 
-void LDMApp::storeInLDM(const int sender, const LDMEntry const * data) {
+void LDMApp::storeInLDM(const int& sender, const LDMEntry& data) {
         EV << "Update for " << sender << std::endl;
-        ldm[sender]=data;
+        ldm[sender]=data; //uses copy constructor to initialize LDMEntry from a reference
 }
 
 
@@ -110,12 +109,8 @@ void LDMApp::handlePositionUpdate(cObject* obj) {
 }
 
 void LDMApp::onBeacon(WaveShortMessage* wsm) {
-        LDMEntry* data = new LDMEntry();
         EV << "Encountered a new beacon from " << wsm->getSenderAddress() << " with intended recipient " << wsm->getRecipientAddress() << " containing the following position: " << wsm->getSenderPos() << " and timestamped at simulation time " << wsm->getTimestamp() << std::endl;
-        Coord c = wsm->getSenderPos(); //call getSenderPos(), use the reference to call the copy constructor of Coord
-        data->pos=c; //store it in LDMEntry
-        data->speed=wsm->getSenderSpeed();
-        data->time=simTime(); // call simTime(), store the result (simtime_t) in the LDMEntry
+        LDMEntry data{wsm->getSenderPos(), wsm->getSenderSpeed(), simTime()};
         storeInLDM(wsm->getSenderAddress(), data);
 }
 
@@ -132,10 +127,10 @@ void LDMApp::finish() {
         for(auto entry=ldm.begin(); entry!=ldm.end(); ++entry)
         {
                 //destroy the LDMEntry object
-                delete(entry->second);
+                //delete(entry->second);
         }
         //destroy the map itself
-        delete(&ldm);
+        //delete(&ldm);
 }
 
 void LDMApp::onData(WaveShortMessage* wsm) {
