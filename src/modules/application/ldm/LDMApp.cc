@@ -35,7 +35,7 @@ const LDMEntry LDMApp::fetchFromLDM(const int sender) const {
 
 void LDMApp::storeInLDM(const int& sender, const LDMEntry& data) {
         EV << "Update for " << sender << std::endl;
-        ldm[sender]=data; //uses copy constructor to initialize LDMEntry from a reference
+        ldm.insert(std::pair<int,LDMEntry>(sender, data));
 }
 
 
