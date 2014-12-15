@@ -18,6 +18,7 @@
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 //
 
+// see also LDMApp.ned
 #include "LDMApp.h"
 
 using Veins::TraCIMobilityAccess;
@@ -52,9 +53,6 @@ void LDMApp::initialize(int stage) {
 
 		sentMessage = false;
 		lastDroveAt = simTime();
-		//findHost()->subscribe(parkingStateChangedSignal, this);
-		isParking = false;
-		sendWhileParking = par("sendWhileParking").boolValue();
 	}
 }
 
@@ -160,6 +158,5 @@ void LDMApp::sendMessage(std::string blockedRoadId) {
 }
 
 void LDMApp::sendWSM(WaveShortMessage* wsm) {
-	if (isParking && !sendWhileParking) return;
 	sendDelayedDown(wsm,individualOffset);
 }

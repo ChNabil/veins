@@ -35,6 +35,5 @@ import org.car2x.veins.base.modules.IBaseApplLayer;
 simple LDMApp extends BaseWaveApplLayer
 {
         @class(LDMApp);
-        bool sendWhileParking = default(false); 
 
 }
