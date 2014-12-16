@@ -8,3 +8,4 @@ Used C++11 features:
  * override
  * std::map::at
  * auto
+ * initializer lists

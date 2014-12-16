@@ -62,6 +62,8 @@ f.write('run_libs = %s\n' % repr(run_libs))
 f.write('run_neds = %s\n' % repr(run_neds))
 f.close()
 
+if not os.environ['OMNETPP_CONFIGFILE']:
+        print 'Warning; OMNETPP_CONFIGFILE is not set; use export OMNETPP_CONFIGFILE="`pwd`/Makefile.inc" to set it and enable C++11 features, then run ./configure again'
 check_call(['env', 'opp_makemake'] + makemake_flags, cwd='src')
 
 print 'Configure done. You can now run "make".'

@@ -21,24 +21,20 @@
 #ifndef LDMAPP_H_
 #define LDMAPP_H_
 
-#include "BaseWaveApplLayer.h"
+#include "veins/modules/application/ieee80211p/BaseWaveApplLayer.h"
 #include <map>
-#include <BaseApplLayer.h>
-#include <Consts80211p.h>
-#include <WaveShortMessage_m.h>
-#include "Coord.h"
-#include "base/connectionManager/ChannelAccess.h"
-#include <WaveAppToMac1609_4Interface.h>
-#include "modules/mobility/traci/TraCIMobility.h"
+#include "veins/base/modules/BaseApplLayer.h"
+#include "veins/modules/utility/Consts80211p.h"
+#include "veins/modules/messages/WaveShortMessage_m.h"
+#include "veins/base/utils/Coord.h"
+#include "veins/base/connectionManager/ChannelAccess.h"
+#include "veins/modules/mac/ieee80211p/WaveAppToMac1609_4Interface.h"
+#include "veins/modules/mobility/traci/TraCIMobility.h"
+#include "veins/modules/mobility/traci/TraCICommandInterface.h"
 
 using Veins::TraCIMobility;
+using Veins::TraCICommandInterface;
 using Veins::AnnotationManager;
-
-#ifndef DBG
-#define DBG EV
-//#define DBG (ev.isDisabled()||!debug) ? ev : ev << "[" << simTime().raw() << "] " << getParentModule()->getFullPath() << " "
-#endif
-
 
 /**
  * @brief description of a single local dynamic map entry.
@@ -96,7 +92,9 @@ class LDMApp : public BaseWaveApplLayer {
 		virtual void finish();
 
 	protected:
-		TraCIMobility* traci;
+		TraCIMobility* mobility;
+		TraCICommandInterface* traci;
+		TraCICommandInterface::Vehicle* traciVehicle;
 		AnnotationManager* annotations;
 		simtime_t lastDroveAt;
 		bool sentMessage;

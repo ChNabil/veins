@@ -47,7 +47,9 @@ void LDMApp::storeInLDM(const int& sender, const LDMEntry& data) {
 void LDMApp::initialize(int stage) {
 	BaseWaveApplLayer::initialize(stage);
 	if (stage == 0) {
-		traci = TraCIMobilityAccess().get(getParentModule());
+		mobility = TraCIMobilityAccess().get(getParentModule());
+		traci = mobility->getCommandInterface();
+		traciVehicle = mobility->getVehicleCommandInterface();
 		annotations = AnnotationManagerAccess().getIfExists();
 		ASSERT(annotations);
 
@@ -94,7 +96,7 @@ void LDMApp::handlePositionUpdate(cObject* obj) {
 
         //code from the TraCIDemo11p:
 	// stopped for for at least 10s?
-	if (traci->getSpeed() < 1) {
+	if (mobility->getSpeed() < 1) {
 		if (simTime() - lastDroveAt >= 10) {
                         // visualize that the car is stopped
 			findHost()->getDisplayString().updateWith("r=16,red");
@@ -134,9 +136,9 @@ void LDMApp::finish() {
 void LDMApp::onData(WaveShortMessage* wsm) {
 	//Code from TraCIDemo11p
 	findHost()->getDisplayString().updateWith("r=16,green");
-	annotations->scheduleErase(1, annotations->drawLine(wsm->getSenderPos(), traci->getPositionAt(simTime()), "blue"));
+	annotations->scheduleErase(1, annotations->drawLine(wsm->getSenderPos(), mobility->getPositionAt(simTime()), "blue"));
 
-	if (traci->getRoadId()[0] != ':') traci->commandChangeRoute(wsm->getWsmData(), 9999);
+	if (mobility->getRoadId()[0] != ':') traciVehicle->changeRoute(wsm->getWsmData(), 9999);
 	if (!sentMessage) sendMessage(wsm->getWsmData());
 	//end code from TraCIDemo11p
 
