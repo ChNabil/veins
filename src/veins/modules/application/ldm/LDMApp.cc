@@ -155,7 +155,8 @@ void LDMApp::sendMessage(std::string blockedRoadId) {
         sentMessage = true;
 
         t_channel channel = dataOnSch ? type_SCH : type_CCH;
-        WaveShortMessage* wsm = prepareWSM("data", dataLengthBits, channel, dataPriority, -1,2);        wsm->setWsmData(blockedRoadId.c_str());
+        WaveShortMessage* wsm = prepareWSM("data", dataLengthBits, channel, dataPriority, -1,2);
+        wsm->setWsmData(blockedRoadId.c_str());
         sendWSM(wsm);
 }
 
