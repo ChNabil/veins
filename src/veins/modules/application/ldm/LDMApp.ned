@@ -35,5 +35,7 @@ import org.car2x.veins.base.modules.IBaseApplLayer;
 simple LDMApp extends BaseWaveApplLayer
 {
         @class(LDMApp);
-
+        //createTrace enables trace collection for this vehicle; this means
+        //everything is written to the event log.
+        bool createTrace = default(false);
 }

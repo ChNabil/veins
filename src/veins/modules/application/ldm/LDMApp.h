@@ -32,9 +32,15 @@
 #include "veins/modules/mobility/traci/TraCIMobility.h"
 #include "veins/modules/mobility/traci/TraCICommandInterface.h"
 
+#ifndef TRACE
+#define TRACE ev << "TRACING: " << getMyID() << ";" <<  getMyPosition() << ";" << simTime() << ";" << getMetaData()
+#endif
+
 using Veins::TraCIMobility;
 using Veins::TraCICommandInterface;
 using Veins::AnnotationManager;
+
+//implementation LDMApp.cc
 
 /**
  * @brief description of a single local dynamic map entry.
@@ -99,7 +105,8 @@ class LDMApp : public BaseWaveApplLayer {
 		simtime_t lastDroveAt;
 		bool sentMessage;
 		bool isParking;
-		bool sendWhileParking;
+                //see LDMApp.ned
+		bool createTrace;
                 //maps addresses to their respective LDM entries.
                 std::map<int,LDMEntry> ldm;
 
@@ -109,6 +116,15 @@ class LDMApp : public BaseWaveApplLayer {
 		virtual void storeInLDM(const int& sender, const LDMEntry& data);
                 //retrieval method
                 virtual const LDMEntry fetchFromLDM(const int sender) const;
+                //information about self: ID, position, speed, direction
+                virtual const int getMyID() const;
+                virtual const Coord getMyPosition() const;
+                virtual const double getMySpeed() const;
+                virtual const double getAngle() const;
+                //getMetaData is meta-data included with every output
+                virtual const std::string getMetaData() const;
+                //create trace output (only created when createTrace is set)
+                virtual const void traceStep() const;
 
                 //reception method for beacons -- override when message type is different
 		virtual void onBeacon(WaveShortMessage * wsm) override;

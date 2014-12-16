@@ -35,10 +35,35 @@ const LDMEntry LDMApp::fetchFromLDM(const int sender) const {
 }
 
 void LDMApp::storeInLDM(const int& sender, const LDMEntry& data) {
-        EV << "Update for " << sender << std::endl;
+        DBG << "Update for " << sender << std::endl;
         ldm.insert(std::pair<int,LDMEntry>(sender, data));
 }
 
+const int LDMApp::getMyID() const {
+        return getParentModule()->getIndex(); //Car.ned's index.
+}
+
+const Coord LDMApp::getMyPosition() const {
+        return mobility->getPositionAt(simTime());
+}
+
+const double LDMApp::getMySpeed() const {
+        return mobility->getSpeed();
+}
+
+const double LDMApp::getAngle() const {
+        return mobility->getAngleRad();
+}
+
+const std::string LDMApp::getMetaData() const {
+        return "";
+}
+
+const void LDMApp::traceStep() const {
+        if(createTrace){
+                TRACE << std::endl;
+        }
+}
 
 /* 
    **************** Overridden methods *******************
@@ -106,10 +131,11 @@ void LDMApp::handlePositionUpdate(cObject* obj) {
 		lastDroveAt = simTime();
 	}
         //end of code from the TraCIDemo11p
+        traceStep();
 }
 
 void LDMApp::onBeacon(WaveShortMessage* wsm) {
-        EV << "Encountered a new beacon from " << wsm->getSenderAddress() << " with intended recipient " << wsm->getRecipientAddress() << " containing the following position: " << wsm->getSenderPos() << " and timestamped at simulation time " << wsm->getTimestamp() << std::endl;
+        DBG << "Encountered a new beacon from " << wsm->getSenderAddress() << " with intended recipient " << wsm->getRecipientAddress() << " containing the following position: " << wsm->getSenderPos() << " and timestamped at simulation time " << wsm->getTimestamp() << std::endl;
         LDMEntry data{wsm->getSenderPos(), wsm->getSenderSpeed(), simTime()};
         storeInLDM(wsm->getSenderAddress(), data);
 }
