@@ -1,8 +1,8 @@
 This document contains notes I wrote while using VEINS. Currently mostly an overview of what is where.
 ## Version
-In order to run the most recent version of VEINS (3.0), see [the tutorial](http://veins.car2x.org/tutorial/).
+In order to run the most recent version of VEINS (4a1), see [the tutorial](http://veins.car2x.org/tutorial/).
 In particular, make sure you have sumo 0.21.0 and OMNeT++ (these notes assume 4.5).
-For the scripts to work correctly, the `opp_run` binary of OMNeT++ should be in the search path; in other words, `PATH` should contain the omnetpp binary folder (e.g., `/home/namnatulco/ulm/simulation/omnetpp-4.5./bin`)
+For the scripts to work correctly, the `opp_run` binary of OMNeT++ should be in the search path; in other words, `PATH` should contain the omnetpp binary folder (e.g., `/home/namnatulco/ulm/simulation/omnetpp-4.5./bin`). It is also helpful to define SUMOPATH as the path to your sumo binary. If you want to use C++11 features, make sure to set OMNETPP_CONFIGFILE to Makefile.inc (included in this repository)
 
 ## Structure
 The following are some important files; read this to understand how the veins respository/directory is organized.
@@ -17,25 +17,25 @@ The following are some important files; read this to understand how the veins re
 `./examples/veins/erlangen.*.xml` and `erlangen.sumo.cfg` -- example configuration of SUMO that is expected by the example scenario  
 `./examples/veins/run` -- a script that starts `opp_run` with some additional parameters (through the python script `./run`)  
 `./sumo-launchd.py` -- python script that runs SUMO as needed (see --help)  
-`./out` -- directory that will contain object code, libveins.so, and so on. Created by make scripts.  
+`./out` -- directory that will contain object code and so on. Created by make scripts.  
 `./doc` -- documentation.  
 `./images` -- images that can be used by the OMNeT++ GUI.  
 `./tests` -- tests.  
 `./src` -- contains all code.  
-`./src/base` -- contains low-level features. Mostly PHY and MAC tools, battery management, mobility basics, channel sensing.  
-`./src/inet` -- (3D) Coordinate representation  
 `./src/scripts` -- scripts used to generate the run/debug/memcheck tools.  
-`./src/nodes` -- contains NED files for network  
-`./src/modules` -- contains tools to be used for simulations:  
-`./src/modules/world` -- contains visualization management for OMNeT++ GUI.  
-`./src/modules/obstacle` -- contains obstacle modeling [for attenuation].  
-`./src/modules/analogueModel` -- contains signal models.  
-`./src/modules/phy` -- contains PHY models and PHY<->MAC interfaces.  
-`./src/modules/mac` -- contains MAC models (802.11p/1609.4).  
-`./src/modules/nic` -- contains a network interface for 802.11p.  
-`./src/modules/mobility` -- contains mobility models (currently only TraCI).  
-`./src/modules/messages` -- contains message types.  
-`./src/modules/application` -- contains actual applications that run ontop of the stack (a TraCI demo app and a basic wave application layer)
+`./src/veins/base` -- contains low-level features. Mostly PHY and MAC tools, battery management, mobility basics, channel sensing.  
+`./src/veins/inet` -- (3D) Coordinate representation  
+`./src/veins/nodes` -- contains NED files for network  
+`./src/veins/modules` -- contains tools to be used for simulations:  
+`./src/veins/modules/world` -- contains visualization management for OMNeT++ GUI.  
+`./src/veins/modules/obstacle` -- contains obstacle modeling [for attenuation].  
+`./src/veins/modules/analogueModel` -- contains signal models.  
+`./src/veins/modules/phy` -- contains PHY models and PHY<->MAC interfaces.  
+`./src/veins/modules/mac` -- contains MAC models (802.11p/1609.4).  
+`./src/veins/modules/nic` -- contains a network interface for 802.11p.  
+`./src/veins/modules/mobility` -- contains mobility models (currently only TraCI).  
+`./src/veins/modules/messages` -- contains message types.  
+`./src/veins/modules/application` -- contains actual applications that run ontop of the stack (a TraCI demo app and a basic wave application layer)
 
 ## File types and conventions
 ### NED files
@@ -80,7 +80,7 @@ This is the central configuration file for OMNeT++. Here you can define simulati
 The simulation is organized hierarchically (in this case the `RSUExampleScenario` being the root), which means that you will configure the different nodes and their components using a tree-like structure. All parameters given directly to OMNeT++ (such as `network=..`) are on the top layer, while parameters for VEINS components are typically defined indirectly, such as the size of the simulated area: `*.playgroundSizeX`. Definitions that apply to different types of nodes can be matched with `**`, for example; `***.nic....` configures the network interfaces of any node. Finally, you can configure specific nodes by hand using `*.rsu[0]...` (to configure the 0th RSU node), and all nodes using `*.rsu[*]....`.
 
 #### RSUExampleScenario.ned
-This is the example scenario defined for the VEINS demo. It shows how to build your Scenario as a NED file by extending the standard scenario (`./src/nodes/Scenario.ned`). In this case, the only change is the addition of an RSU. If you check out the super-class, you'll find (for example) how playground size (= size of the simulated area) is configured.
+This is the example scenario defined for the VEINS demo. It shows how to build your Scenario as a NED file by extending the standard scenario (`./src/veins/nodes/Scenario.ned`). In this case, the only change is the addition of an RSU. If you check out the super-class, you'll find (for example) how playground size (= size of the simulated area) is configured.
 
 
 #### config.xml
@@ -106,7 +106,7 @@ virtual WaveShortMessage* prepareWSM(std::string name, int dataLengthBits, t_cha
 Which should override the standard VEINS method `BaseWaveApplLayer::prepareWSM`. Note that the `override` here is a C++11 feature (which works as expected with a current g++ compiler -- it checks that something is actually overridden; if not, it will provide an error). What happened in this particular case is that the implementation of the class `LDMApp` did not have an implementation of the specified virtual method, `prepareWSM`. Unlike what you might expect, this is **not** checked by the compiler.
 
 ### Cannot access fields from `.msg`-generated type
-If you try to access a field in a Message type that was specified using the OMNeT++ `.msg` file type (See [message definitions](http://www.omnetpp.org/doc/omnetpp/manual/usman.html#sec224) in the OMNeT++ user manual) as follows (the message type is defined [here](src/modules/messages/WaveShortMessage.msg)), it will not work:
+If you try to access a field in a Message type that was specified using the OMNeT++ `.msg` file type (See [message definitions](http://www.omnetpp.org/doc/omnetpp/manual/usman.html#sec224) in the OMNeT++ user manual) as follows (the message type is defined [here](src/veins/modules/messages/WaveShortMessage.msg)), it will not work:
 ```cpp
 void LDMApp::onBeacon(WaveShortMessage * wsm){ 
         do_things(wsm->senderAddress);
@@ -117,9 +117,9 @@ This is intentional -- `opp_msgc` creates getters and setters for each of the va
 ### Module interfaces
 If you encounter the following error:
 ```
-Error: base type org.car2x.veins.modules.application.ieee80211p.BaseWaveApplLayer is expected to be a module interface, at .../src/modules/application/ldm/LDMApp.ned:35.
+Error: base type org.car2x.veins.modules.application.ieee80211p.BaseWaveApplLayer is expected to be a module interface, at .../src/veins/modules/application/ldm/LDMApp.ned:35.
 ```
-Then you tried to use the `like` keyword to extend (in this example) [BaseWaveApplLayer](src/modules/application/ieee802.11p/BaseWaveApplLayer.ned) with something like this code:
+Then you tried to use the `like` keyword to extend (in this example) [BaseWaveApplLayer](src/veins/modules/application/ieee802.11p/BaseWaveApplLayer.ned) with something like this code:
 ```
 simple LDMApp like BaseWaveApplLayer
 {
