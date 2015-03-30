@@ -34,7 +34,11 @@
 
 #ifndef TRACE
 #define TRACE ev << "TRACING: " << getMyID() << ";" <<  getMyPosition() << ";" << simTime() << ";" << getMetaData()
+#include<mutex>
+std::mutex mutex; //mutex for logging
 #endif
+
+
 
 using Veins::TraCIMobility;
 using Veins::TraCICommandInterface;

@@ -21,6 +21,9 @@
 // see also LDMApp.ned
 #include "LDMApp.h"
 
+#include<iostream>
+#include<fstream>
+#include<mutex>
 using Veins::TraCIMobilityAccess;
 using Veins::AnnotationManagerAccess;
 
@@ -61,7 +64,12 @@ const std::string LDMApp::getMetaData() const {
 
 const void LDMApp::traceStep() const {
         if(createTrace){
-                TRACE << std::endl;
+                //mutex.lock();
+                std::ofstream tracefile;
+                tracefile.open("tracelog.txt", std::ios_base::app);
+                tracefile << getMyID() << ";" <<  getMyPosition() << ";" << simTime() << ";" << getMetaData() << std::endl;
+                tracefile.close();
+                //mutex.unlock();
         }
 }
 
