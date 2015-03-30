@@ -32,7 +32,7 @@ module Car
     gates:
         input veinsradioIn; // gate for sendDirect
     submodules:
-        ldmApp: <applType> like org.car2x.veins.base.modules.IBaseApplLayer {
+        appl: <applType> like org.car2x.veins.base.modules.IBaseApplLayer {
             parameters:
                 @display("p=60,50");
         }
@@ -48,10 +48,10 @@ module Car
         }
         
     connections:
-        nic.upperLayerOut --> ldmApp.lowerLayerIn;
-        nic.upperLayerIn <-- ldmApp.lowerLayerOut;
-        nic.upperControlOut --> ldmApp.lowerControlIn;
-        nic.upperControlIn <-- ldmApp.lowerControlOut;
+        nic.upperLayerOut --> appl.lowerLayerIn;
+        nic.upperLayerIn <-- appl.lowerLayerOut;
+        nic.upperControlOut --> appl.lowerControlIn;
+        nic.upperControlIn <-- appl.lowerControlOut;
 
         veinsradioIn --> nic.radioIn;
 

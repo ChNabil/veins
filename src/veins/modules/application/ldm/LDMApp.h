@@ -34,11 +34,7 @@
 
 #ifndef TRACE
 #define TRACE ev << "TRACING: " << getMyID() << ";" <<  getMyPosition() << ";" << simTime() << ";" << getMetaData()
-#include<mutex>
-std::mutex mutex; //mutex for logging
 #endif
-
-
 
 using Veins::TraCIMobility;
 using Veins::TraCICommandInterface;
@@ -50,23 +46,61 @@ using Veins::AnnotationManager;
  * @brief description of a single local dynamic map entry.
  * @author Rens van der Heijden
  */
+
+class Opinions {
+                private:
+                double belief = 0.0;
+                double disbelief = 0.0;
+                double uncertainty = 0.0;
+
+                public:
+                void setbelief(double bel); //override;
+                double getbelief(); //override;
+                void setdisbelief(double disbel); //override;
+                double getdisbelief(); //override;
+                void setuncertainty(double uncert); //override;
+                double getuncertainty(); //override;
+                };
+
+
 class LDMEntry {
         simtime_t time;  //timestamp for the most recent update
         Coord pos; //most recent position
         int speed; //most recent speed value
+        double angle; //the angle of the sender
+        Opinions ART; //ART's (belief, disbelief, uncertainty)
+	Opinions Overlap; //ART's (belief, disbelief, uncertainty)
+         	//Overlap
+		// mervat
+     //   double ARTbeliefOpinion;
+     //   double ARTdisbeliefOpinion;
+     //   double ARTuncertaintyOpinion;
         // more data elements can be put here.
 
         public:
-        LDMEntry(const Coord p, const int v, const simtime_t t){
+      //  Opinions ART;
+        LDMEntry(const Coord p, const int v, const simtime_t t, const double ang, const Opinions a, const Opinions o){ //, const double ARTbeliefop, const double ARTdisbeliefop, const double ARTuncertaintyop){
                 this->pos=p;
                 this->speed=v;
                 this->time=t;
+                this->angle=ang;
+                this-> ART=a;
+                this-> Overlap=o;
+          //      this->ARTbeliefOpinion=ARTbeliefop;
+          //      this->ARTdisbeliefOpinion=ARTdisbeliefop;
+          //      this->ARTuncertaintyOpinion=ARTuncertaintyop;
         }
         
         LDMEntry& operator=(const LDMEntry& other){
                 pos=other.pos;
                 speed=other.speed;
                 time=other.time;
+                angle=other.angle;
+                ART=other.ART;
+                Overlap=other.Overlap;
+           //     ARTbeliefOpinion=other.ARTbeliefOpinion;
+           //     ARTdisbeliefOpinion=other.ARTdisbeliefOpinion;
+           //     ARTuncertaintyOpinion=other.ARTuncertaintyOpinion;
                 return *this;
         }
         
@@ -74,11 +108,23 @@ class LDMEntry {
                 this->pos=other.getPosition();
                 this->speed=other.getSpeed();
                 this->time=other.getTime();
+                this->angle=other.getAnglefromLDM();
+                this->ART=other.getART();
+                this->Overlap=other.getOverlap();
+         //       this->ARTbeliefOpinion=other.getbel();
+         //       this->ARTdisbeliefOpinion=other.getdisbel();
+         //       this->ARTuncertaintyOpinion=other.getuncer();
         }
         
         simtime_t getTime()const{return time;}
         Coord getPosition()const{return pos;}
         int getSpeed()const{return speed;}
+        double getAnglefromLDM()const{return angle;}
+        Opinions getART()const{return ART;}
+        Opinions getOverlap()const{return Overlap;}
+   //    double getbel()const{return ARTbeliefOpinion;}
+   //    double getdisbel()const{return ARTdisbeliefOpinion;}
+   //    double getuncer()const{return ARTuncertaintyOpinion;}
 };
 
 /**
@@ -100,7 +146,26 @@ class LDMApp : public BaseWaveApplLayer {
 		~LDMApp();
 		virtual void initialize(int stage);
 		virtual void finish();
-
+		const int ART_threshold = 300;
+		double distance = 0.0;
+        Coord ModificationVector;
+        Coord senderPosModified;
+        double senderAngle;
+        Opinions ART;
+        Opinions Overlap;
+        Coord LF_sender;
+        Coord RF_sender;
+        Coord LR_sender;
+        Coord RR_sender;
+        Coord P[];
+        Coord center_pos_rx;
+        Coord LF_receiver;
+        Coord RF_receiver;
+        Coord LR_receiver;
+        Coord RR_receiver;
+        Coord T[];
+        double X[];
+        int senderID;
 	protected:
 		TraCIMobility* mobility;
 		TraCICommandInterface* traci;
@@ -113,11 +178,29 @@ class LDMApp : public BaseWaveApplLayer {
 		bool createTrace;
                 //maps addresses to their respective LDM entries.
                 std::map<int,LDMEntry> ldm;
+/////////////////////////// Opinions Class /////////////////////
+//    public:
+//
+//    class Opinions {
+//                private:
+//                double belief = 0.0;
+//                double disbelief = 0.0;
+//                double uncertainty = 0.0;
+//
+//                public:
+//                void setbelief(double bel); //override;
+//                double getbelief(); //override;
+//                void setdisbelief(double disbel); //override;
+//                double getdisbelief(); //override;
+//                void setuncertainty(double uncert); //override;
+//                double getuncertainty(); //override;
+//                } ART;
 
+/////////////////////////////////////////////////////////////
 
 	protected:
                 //storage method -- override to add tests etc.
-		virtual void storeInLDM(const int& sender, const LDMEntry& data);
+		virtual void storeInLDM(const int sender, const LDMEntry& data);
                 //retrieval method
                 virtual const LDMEntry fetchFromLDM(const int sender) const;
                 //information about self: ID, position, speed, direction
@@ -147,6 +230,7 @@ class LDMApp : public BaseWaveApplLayer {
                 //wrapper that sends a message of type "data":
 		void sendMessage(std::string blockedRoadId);
 		virtual void sendWSM(WaveShortMessage* wsm);
+		double calcLength(double x0, double y0, double x1, double y1); //override;
 };
 
 #endif /* LDMAPP_H_ */

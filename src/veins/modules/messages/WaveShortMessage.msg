@@ -48,6 +48,6 @@ packet WaveShortMessage {
 	int recipientAddress = -1;
 	int serial = 0;
 	Coord senderPos;
-	int senderSpeed;
 	simtime_t timestamp = 0;
+	double senderAngle;     // Added by Ala'a
 }

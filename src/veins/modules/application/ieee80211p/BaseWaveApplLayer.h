@@ -69,7 +69,7 @@ class BaseWaveApplLayer : public BaseApplLayer {
 		/** @brief handle self messages */
 		virtual void handleSelfMsg(cMessage* msg);
 
-		virtual WaveShortMessage* prepareWSM(std::string name, int dataLengthBits, t_channel channel, int priority, int rcvId, int serial=0);
+		virtual WaveShortMessage* prepareWSM(std::string name, int dataLengthBits, t_channel channel, int priority, int rcvId, int serial=0); // override;
 		virtual void sendWSM(WaveShortMessage* wsm);
 		virtual void onBeacon(WaveShortMessage* wsm) = 0;
 		virtual void onData(WaveShortMessage* wsm) = 0;
@@ -88,6 +88,7 @@ class BaseWaveApplLayer : public BaseApplLayer {
 		Coord curPosition;
 		int mySCH;
 		int myId;
+		double curAngle;    // Added by Ala'a
 
 		cMessage* sendBeaconEvt;
 
