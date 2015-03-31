@@ -140,7 +140,7 @@ wsm->setSenderPos(senderPosModified); // get rid of void
                         ev << " position of the sender: " << wsm->getSenderPos().x << " , " << wsm->getSenderPos().y << std::endl; // added for debugging
                         //TODO add additional payload to WSM.
 			sendWSM(wsm);
-			scheduleAt(simTime() + par("beaconInterval").doubleValue(), BaseWaveApplLayer::sendBeaconEvt);
+			scheduleAt(simTime() + par("beaconInterval").doubleValue() + (0.05 * getMyID()), BaseWaveApplLayer::sendBeaconEvt);
 			break;
 		}
 		default: {
