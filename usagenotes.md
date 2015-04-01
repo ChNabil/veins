@@ -82,9 +82,11 @@ The simulation is organized hierarchically (in this case the `RSUExampleScenario
 #### RSUExampleScenario.ned
 This is the example scenario defined for the VEINS demo. It shows how to build your Scenario as a NED file by extending the standard scenario (`./src/veins/nodes/Scenario.ned`). In this case, the only change is the addition of an RSU. If you check out the super-class, you'll find (for example) how playground size (= size of the simulated area) is configured.
 
-
 #### config.xml
 In `config.xml`, you can define certain parameters of VEINS' default NIC here, including the selected path loss model.
+
+### Beaconing
+When implementing beaconing applications, you will need to make sure that you avoid the nodes synchronizing their transmission unintentionally, because you might configure sending every second starting at `t=0.1`. This will cause all vehicles to attempt to send at exactly this time; in practice this will not happen, and you thus need to compensate for this. For example, you can add some random jitter to the first transmission, which breaks the synchronization. See also [this thread](https://groups.google.com/forum/#!topic/omnetpp/EhumLHlW3l0).
 
 ## Errors
 Sometimes, gcc/opp error messages are less than clear. These are the messages I've encountered problems with. 
