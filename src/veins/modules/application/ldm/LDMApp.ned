@@ -38,4 +38,5 @@ simple LDMApp extends BaseWaveApplLayer
         //createTrace enables trace collection for this vehicle; this means
         //everything is written to the event log.
         bool createTrace = default(false);
+        string traceFile = default("tracelog.csv");
 }

@@ -111,6 +111,7 @@ class LDMApp : public BaseWaveApplLayer {
 		bool isParking;
                 //see LDMApp.ned
 		bool createTrace;
+                std::string traceFile;
                 //maps addresses to their respective LDM entries.
                 std::map<int,LDMEntry> ldm;
 

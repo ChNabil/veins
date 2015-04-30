@@ -66,8 +66,12 @@ const void LDMApp::traceStep() const {
         if(createTrace){
                 //mutex.lock();
                 std::ofstream tracefile;
-                tracefile.open("tracelog.txt", std::ios_base::app);
-                tracefile << getMyID() << ";" <<  getMyPosition() << ";" << simTime() << ";" << getMetaData() << std::endl;
+                tracefile.open(traceFile, std::ios_base::app);
+                if(tracefile.is_open()){
+                        tracefile << getMyID() << ";" <<  getMyPosition() << ";" << simTime() << ";" << getMetaData() << std::endl;
+                }else{
+                        std::cout << getMyID() << ";" <<  getMyPosition() << ";" << simTime() << ";" << getMetaData() << std::endl;
+                }
                 tracefile.close();
                 //mutex.unlock();
         }
@@ -88,6 +92,9 @@ void LDMApp::initialize(int stage) {
 
 		sentMessage = false;
 		lastDroveAt = simTime();
+
+	        createTrace = par("createTrace");
+	        traceFile = par("traceFile").stdstringValue();
 	}
 }
 

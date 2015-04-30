@@ -65,6 +65,10 @@ void TraCIScenarioManager::initialize(int stage) {
 	}
 
 
+	createTrace = par("createTrace");
+	traceFile = par("traceFile").stdstringValue();
+	traceCoords = par("traceCoords").stdstringValue();
+
 	debug = par("debug");
 	connectAt = par("connectAt");
 	firstStepAt = par("firstStepAt");
@@ -168,6 +172,20 @@ void TraCIScenarioManager::init_traci() {
 		MYDEBUG << "TraCI reports network boundaries (" << x1 << ", " << y1 << ")-(" << x2 << ", " << y2 << ")" << endl;
 		connection->setNetbounds(netbounds1, netbounds2, par("margin"));
 		if ((connection->traci2omnet(netbounds2).x > world->getPgs()->x) || (connection->traci2omnet(netbounds1).y > world->getPgs()->y)) MYDEBUG << "WARNING: Playground size (" << world->getPgs()->x << ", " << world->getPgs()->y << ") might be too small for vehicle at network bounds (" << connection->traci2omnet(netbounds2).x << ", " << connection->traci2omnet(netbounds1).y << ")" << endl;
+
+                if(createTrace){
+                        //mutex.lock();
+                        std::ofstream tracefile;
+                        tracefile.open(traceFile, std::ios_base::app);
+                        if(traceCoords.size()!=0){
+                                tracefile << traceCoords << std::endl;
+                        }else{
+                                tracefile << "Coordinates not configured. Run 'python ../../extractCoords.py \"your-sumo-net-file\" >> omnetpp.ini' to add the coordinates to your omnetpp.ini file. Alternatively, replace this line with the origBoundary attribute of the location node in your SUMO net file." << std::endl;//<< bottomright << std::endl;
+                        }
+                        tracefile << "--------------------------------------------------------------------------------" << std::endl;
+                        tracefile.close();
+                        //mutex.unlock();
+                }
 	}
 
 	{
