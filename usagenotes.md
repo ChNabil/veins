@@ -130,7 +130,9 @@ simple LDMApp like BaseWaveApplLayer
 You should use the `extends` keyword.
 
 ### C++11 features
-See [this blog post](http://adamcavendish.is-programmer.com/posts/42316.html). A correct `Makefile.inc` is included in the root of this repository. 
+See [this blog post](http://adamcavendish.is-programmer.com/posts/42316.html). A correct `Makefile.inc` is included in the root of this repository.
+
+The `configure` script checks whether this Makefile.inc is actually used; if you want to enable it in the OMNET++ IDE, go to the project settings (Alt+Enter), and under C/C++ Build find the screen for Environment; there add a variable `OMNETPP_CONFIGFILE` with the value `/path/to/repository/Makefile.inc`. If you always want to use C++11 features, copy `Makefile.inc` to some location (e.g., your omnetpp folder) and set the `OMNETPP_CONFIGFILE` globally.
 
 ### Check consistency between `omnetpp.ini` and your `.ned` files
 Remember that OMNeT++ will/can not verify that all properties in your `omnetpp.ini` exist. The opposite is often true if you inherit from existing code -- for most application `.ned` files, defaults are set, and these may interact with your `omnetpp.ini`. For example, you might set your implementation of `org.car2x.veins.base.mdoules.IBaseApplLayer`'s `dataOnSch` to `true`, while your `org.car2x.veins.modules.mac.iee80211p.Mac1609_4` has its `useServiceChannel` set to `false`. This will lead to potentially confusing assertion errors!
