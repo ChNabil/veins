@@ -1,8 +1,8 @@
 This document contains notes I wrote while using VEINS. Currently mostly an overview of what is where.
 ## Version
-In order to run the most recent version of VEINS (4a1), see [the tutorial](http://veins.car2x.org/tutorial/).
+In order to run the most recent stable version of VEINS, see [the tutorial](http://veins.car2x.org/tutorial/).
 In particular, make sure you have sumo 0.21.0 and OMNeT++ (these notes assume 4.5).
-For the scripts to work correctly, the `opp_run` binary of OMNeT++ should be in the search path; in other words, `PATH` should contain the omnetpp binary folder (e.g., `/home/namnatulco/ulm/simulation/omnetpp-4.5./bin`). It is also helpful to define SUMOPATH as the path to your sumo binary. If you want to use C++11 features, make sure to set OMNETPP_CONFIGFILE to Makefile.inc (included in this repository)
+For the scripts to work correctly, the `opp_run` binary of OMNeT++ should be in the search path; in other words, `PATH` should contain the omnetpp binary folder (e.g., `/home/namnatulco/ulm/simulation/omnetpp-4.5./bin`). It is also helpful to define SUMOPATH as the path to your sumo binary. If you want to use C++11 features, modify the `Makefile.inc` in your omnetpp folder, or use `omnetpp-4.6`. Because OMNeT++ 4.6 is preparing for significant changes in OMNeT++ 5, you'll notice a lot of warnings about deprecated code if you compile against it.
 
 ## Structure
 The following are some important files; read this to understand how the veins respository/directory is organized.
@@ -97,6 +97,8 @@ Situation: your code compiles, but trying to run it with OMNeT++ causes errors s
 <!> Warning: opp_run: Cannot check library ../../src/veins: ../../src//libveins.so: undefined symbol: _ZN6LDMApp10prepareWSMESsi9t_channeliii
 <!> Error during startup: Cannot load library '../../src//libveins.so': ../../src//libveins.so: undefined symbol: _ZN6LDMApp10prepareWSMESsi9t_channeliii.
 ```
+The cause for this can be different things; in this example, the error relates to `LDMApp.prepareWSM`, which is a class in my project. If you encounter similar errors with symbols that should be in OMNeT++, refer to [the issue below](#missing-symbols-omnet).
+
 The relevant C++ code for this case is:
 ```cpp
 class LDMApp : public BaseWaveApplLayer {
@@ -107,6 +109,8 @@ virtual WaveShortMessage* prepareWSM(std::string name, int dataLengthBits, t_cha
 ```
 Which should override the standard VEINS method `BaseWaveApplLayer::prepareWSM`. Note that the `override` here is a C++11 feature (which works as expected with a current g++ compiler -- it checks that something is actually overridden; if not, it will provide an error). What happened in this particular case is that the implementation of the class `LDMApp` did not have an implementation of the specified virtual method, `prepareWSM`. Unlike what you might expect, this is **not** checked by the compiler.
 
+### Missing symbols in OMNeT
+If you encounter errors saying that symbols from the OMNeT++ library (such as `cModule.getFullPath`), one possible cause is that you recently upgraded your system. If you encounter this problem, you'll have it not just for one project, but for all of your OMNeT++ projects. In the end, I resolved this by re-compiling OMNeT++; unfortunately I can't really tell what went wrong, so I can't promise this will work for others.
 ### Cannot access fields from `.msg`-generated type
 If you try to access a field in a Message type that was specified using the OMNeT++ `.msg` file type (See [message definitions](http://www.omnetpp.org/doc/omnetpp/manual/usman.html#sec224) in the OMNeT++ user manual) as follows (the message type is defined [here](src/veins/modules/messages/WaveShortMessage.msg)), it will not work:
 ```cpp
