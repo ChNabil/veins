@@ -23,6 +23,8 @@
 
 #include <omnetpp.h>
 
+using namespace omnetpp;
+
 /**
  * @brief
  * Simple support module to take (a series of) screenshots of a simulation running in the TraCI server.
