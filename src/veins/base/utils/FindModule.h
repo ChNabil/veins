@@ -3,6 +3,8 @@
 
 #include <omnetpp.h>
 
+using namespace omnetpp;
+
 /**
  * @brief Provides method templates to find omnet modules.
  *

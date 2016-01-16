@@ -22,6 +22,8 @@
 #include <omnetpp/clistener.h>
 #include "veins/base/utils/miximkerneldefs.h"
 
+using namespace omnetpp;
+
 #if defined(MIXIM_EXPORT)
 #  define MIXIM_API OPP_DLLEXPORT
 #elif defined(MIXIM_IMPORT)
