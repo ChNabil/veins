@@ -77,7 +77,7 @@ JakesFading::JakesFading(int fadingPaths, simtime_t_cref delayRMS,
 	delay = new simtime_t[fadingPaths];
 
 	for (int i = 0; i < fadingPaths; i++) {
-		angleOfArrival[i] = cos(uniform(getEnvir()->getRNG(0), 0, M_PI)); //TODO verify this works correctly! This constructs a cRandom with the default rng (=0), which is the same as uniform(0, M_PI), i.e., the third argument, which was 0 by default in older versions
+		angleOfArrival[i] = cos(uniform(getEnvir()->getRNG(0), 0, M_PI));
 		delay[i] = exponential(getEnvir()->getRNG(0), delayRMS.dbl());
 	}
 }

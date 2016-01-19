@@ -540,7 +540,7 @@ void Decider80211p::switchToTx() {
 			currentSignal.first = 0;
 		}
 		else {
-			opp_error("Decider80211p: mac layer requested phy to transmit a frame while currently receiving another");
+			throw new cException("Decider80211p: mac layer requested phy to transmit a frame while currently receiving another");
 		}
 	}
 }

@@ -19,7 +19,6 @@
 #define __MIXIM_MIXIMDEFS_H
 
 #include <omnetpp.h>
-#include <omnetpp/clistener.h>
 #include "veins/base/utils/miximkerneldefs.h"
 
 using namespace omnetpp;
@@ -60,6 +59,7 @@ public:
 			ASSERT(sSignalName);
 			sRunId = getRunId();
 			ssChangeSignal = cComponent::registerSignal(sSignalName);
+
 			// opp_warning("%d = cComponent::registerSignal(\"%s\")", ssChangeSignal, sSignalName);
 		}
 		return ssChangeSignal;
