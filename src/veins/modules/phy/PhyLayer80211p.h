@@ -98,6 +98,12 @@ class PhyLayer80211p	: 	public BasePhyLayer,
 		AnalogueModel* initializeSimplePathlossModel(ParameterMap& params);
 
 		/**
+		 * @brief Creates and initializes an AntennaModel with the
+		 * passed parameter values.
+		 */
+		AnalogueModel* initializeAntennaModel(ParameterMap& params);
+
+		/**
 		 * @brief Creates and initializes a LogNormalShadowing with the
 		 * passed parameter values.
 		 */
@@ -133,6 +139,12 @@ class PhyLayer80211p	: 	public BasePhyLayer,
 		 * passed parameter values.
 		 */
 		AnalogueModel* initializeTwoRayInterferenceModel(ParameterMap& params);
+
+        /**
+         * @brief Creates and initializes a NakagamiFading with the
+         * passed parameter values.
+         */
+        AnalogueModel* initializeNakagamiFading(ParameterMap& params);
 
 		/**
 		 * @brief Creates and returns an instance of the Decider with the specified

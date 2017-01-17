@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2012 David Eckhoff <eckhoff@cs.fau.de>
+// Copyright (C) 2016 David Eckhoff <david.eckhoff@fau.de>
 //
 // Documentation for these modules is at http://veins.car2x.org/
 //
@@ -24,6 +24,12 @@
 #include "veins/modules/phy/DeciderResult80211.h"
 #include "veins/base/phyLayer/PhyToMacControlInfo.h"
 #include "veins/modules/messages/PhyControlMessage_m.h"
+
+#if OMNETPP_VERSION >= 0x500
+#define OWNER owner->
+#else
+#define OWNER
+#endif
 
 #define DBG_MAC EV
 //#define DBG_MAC std::cerr << "[" << simTime().raw() << "] " << myId << " "
@@ -63,16 +69,15 @@ void Mac1609_4::initialize(int stage) {
 
 		//create two edca systems
 
-		myEDCA[type_CCH] = new EDCA(type_CCH,par("queueSize").longValue());
+		myEDCA[type_CCH] = new EDCA(this, type_CCH,par("queueSize").longValue());
 		myEDCA[type_CCH]->myId = myId;
 		myEDCA[type_CCH]->myId.append(" CCH");
-
 		myEDCA[type_CCH]->createQueue(2,(((CWMIN_11P+1)/4)-1),(((CWMIN_11P +1)/2)-1),AC_VO);
 		myEDCA[type_CCH]->createQueue(3,(((CWMIN_11P+1)/2)-1),CWMIN_11P,AC_VI);
 		myEDCA[type_CCH]->createQueue(6,CWMIN_11P,CWMAX_11P,AC_BE);
 		myEDCA[type_CCH]->createQueue(9,CWMIN_11P,CWMAX_11P,AC_BK);
 
-		myEDCA[type_SCH] = new EDCA(type_SCH,par("queueSize").longValue());
+		myEDCA[type_SCH] = new EDCA(this, type_SCH,par("queueSize").longValue());
 		myEDCA[type_SCH]->myId = myId;
 		myEDCA[type_SCH]->myId.append(" SCH");
 		myEDCA[type_SCH]->createQueue(2,(((CWMIN_11P+1)/4)-1),(((CWMIN_11P +1)/2)-1),AC_VO);
@@ -88,7 +93,7 @@ void Mac1609_4::initialize(int stage) {
 				case 2: mySCH = Channels::SCH2; break;
 				case 3: mySCH = Channels::SCH3; break;
 				case 4: mySCH = Channels::SCH4; break;
-				default: opp_error("Service Channel must be between 1 and 4"); break;
+				default: throw cRuntimeError("Service Channel must be between 1 and 4"); break;
 			}
 		}
 
@@ -97,7 +102,6 @@ void Mac1609_4::initialize(int stage) {
 		nextMacEvent = new cMessage("next Mac Event");
 
 		if (useSCH) {
-			// introduce a little asynchronization between radios, but no more than .3 milliseconds
 			uint64_t currenTime = simTime().raw();
 			uint64_t switchingTime = SWITCHING_INTERVAL_11P.raw();
 			double timeToNextSwitch = (double)(switchingTime
@@ -111,6 +115,7 @@ void Mac1609_4::initialize(int stage) {
 
 			// channel switching active
 			nextChannelSwitch = new cMessage("Channel Switch");
+			//add a little bit of offset between all vehicles, but no more than syncOffset
 			simtime_t offset = dblrand() * par("syncOffset").doubleValue();
 			scheduleAt(simTime() + offset + timeToNextSwitch, nextChannelSwitch);
 		}
@@ -177,7 +182,7 @@ void Mac1609_4::handleSelfMsg(cMessage* msg) {
 
 		//send the packet
 		Mac80211Pkt* mac = new Mac80211Pkt(pktToSend->getName(), pktToSend->getKind());
-		mac->setDestAddr(LAddress::L2BROADCAST);
+		mac->setDestAddr(LAddress::L2BROADCAST());
 		mac->setSrcAddr(myMacAddress);
 		mac->encapsulate(pktToSend->dup());
 
@@ -254,17 +259,13 @@ void Mac1609_4::handleUpperMsg(cMessage* msg) {
 
 	t_channel chan;
 
-	//rewrite SCH channel to actual SCH the Mac1609_4 is set to
-	if (thisMsg->getChannelNumber() == Channels::SCH1) {
+	if (thisMsg->getChannelNumber() == Channels::CCH) {
+	    chan = type_CCH;
+	}
+	else {
 		ASSERT(useSCH);
 		thisMsg->setChannelNumber(mySCH);
 		chan = type_SCH;
-	}
-
-
-	//put this packet in its queue
-	if (thisMsg->getChannelNumber() == Channels::CCH) {
-		chan = type_CCH;
 	}
 
 	int num = myEDCA[chan]->queuePacket(ac,thisMsg);
@@ -328,7 +329,7 @@ void Mac1609_4::handleLowerControl(cMessage* msg) {
 		//don't set the chan to idle. the PHY layer decides, not us.
 
 		if (guardActive()) {
-			opp_error("We shouldnt have sent a packet in guard!");
+			throw cRuntimeError("We shouldnt have sent a packet in guard!");
 		}
 	}
 	else if (msg->getKind() == Mac80211pToPhy11pInterface::CHANNEL_BUSY) {
@@ -426,7 +427,7 @@ Signal* Mac1609_4::createSignal(simtime_t start, simtime_t length, double power,
 	ConstMapping* txPowerMapping = createSingleFrequencyMapping(start, end, frequency, 5.0e6, power);
 	s->setTransmissionPower(txPowerMapping);
 
-	Mapping* bitrateMapping = MappingUtils::createMapping(DimensionSet::timeDomain, Mapping::STEPS);
+	Mapping* bitrateMapping = MappingUtils::createMapping(DimensionSet::timeDomain(), Mapping::STEPS);
 
 	Argument pos(start);
 	bitrateMapping->setValue(pos, bitrate);
@@ -469,7 +470,7 @@ simtime_t Mac1609_4::timeLeftInSlot() const {
 void Mac1609_4::changeServiceChannel(int cN) {
 	ASSERT(useSCH);
 	if (cN != Channels::SCH1 && cN != Channels::SCH2 && cN != Channels::SCH3 && cN != Channels::SCH4) {
-		opp_error("This Service Channel doesnt exit: %d",cN);
+		throw cRuntimeError("This Service Channel doesnt exit: %d",cN);
 	}
 
 	mySCH = cN;
@@ -518,7 +519,7 @@ void Mac1609_4::handleLowerMsg(cMessage* msg) {
 		statsReceivedPackets++;
 		sendUp(wsm);
 	}
-	else if (dest == LAddress::L2BROADCAST) {
+	else if (dest == LAddress::L2BROADCAST()) {
 		statsReceivedBroadcasts++;
 		sendUp(wsm);
 	}
@@ -542,7 +543,7 @@ int Mac1609_4::EDCA::queuePacket(t_access_category ac,WaveShortMessage* msg) {
 int Mac1609_4::EDCA::createQueue(int aifsn, int cwMin, int cwMax,t_access_category ac) {
 
 	if (myQueues.find(ac) != myQueues.end()) {
-		opp_error("You can only add one queue per Access Category per EDCA subsystem");
+		throw cRuntimeError("You can only add one queue per Access Category per EDCA subsystem");
 	}
 
 	EDCAQueue newQueue(aifsn,cwMin,cwMax,ac);
@@ -558,7 +559,7 @@ Mac1609_4::t_access_category Mac1609_4::mapPriority(int prio) {
 		case 1: return AC_BE;
 		case 2: return AC_VI;
 		case 3: return AC_VO;
-		default: opp_error("MacLayer received a packet with unknown priority"); break;
+		default: throw cRuntimeError("MacLayer received a packet with unknown priority"); break;
 	}
 	return AC_VO;
 }
@@ -587,8 +588,8 @@ WaveShortMessage* Mac1609_4::EDCA::initiateTransmit(simtime_t lastIdle) {
 					//there was already another packet ready. we have to go increase cw and go into backoff. It's called internal contention and its wonderful
 
 					statsNumInternalContention++;
-					iter->second.cwCur = std::min(iter->second.cwMax,iter->second.cwCur*2);
-					iter->second.currentBackoff = intuniform(0,iter->second.cwCur);
+					iter->second.cwCur = std::min(iter->second.cwMax,(iter->second.cwCur+1)*2-1);
+					iter->second.currentBackoff = OWNER intuniform(0,iter->second.cwCur);
 					DBG_MAC << "Internal contention for queue " << iter->first  << " : "<< iter->second.currentBackoff << ". Increase cwCur to " << iter->second.cwCur << std::endl;
 				}
 			}
@@ -596,7 +597,7 @@ WaveShortMessage* Mac1609_4::EDCA::initiateTransmit(simtime_t lastIdle) {
 	}
 
 	if (pktToSend == NULL) {
-		opp_error("No packet was ready");
+		throw cRuntimeError("No packet was ready");
 	}
 	return pktToSend;
 }
@@ -622,7 +623,7 @@ simtime_t Mac1609_4::EDCA::startContent(simtime_t idleSince,bool guardActive) {
 
 			if (guardActive == true && iter->second.currentBackoff == 0) {
 				//cw is not increased
-				iter->second.currentBackoff = intuniform(0,iter->second.cwCur);
+				iter->second.currentBackoff = OWNER intuniform(0,iter->second.cwCur);
 				statsNumBackoff++;
 			}
 
@@ -706,7 +707,7 @@ void Mac1609_4::EDCA::stopContent(bool allowBackoff, bool generateTxOp) {
 	}
 }
 void Mac1609_4::EDCA::backoff(t_access_category ac) {
-	myQueues[ac].currentBackoff = intuniform(0,myQueues[ac].cwCur);
+	myQueues[ac].currentBackoff = OWNER intuniform(0,myQueues[ac].cwCur);
 	statsSlotsBackoff += myQueues[ac].currentBackoff;
 	statsNumBackoff++;
 	DBG_MAC << "Going into Backoff because channel was busy when new packet arrived from upperLayer" << std::endl;
@@ -717,7 +718,7 @@ void Mac1609_4::EDCA::postTransmit(t_access_category ac) {
 	myQueues[ac].queue.pop();
 	myQueues[ac].cwCur = myQueues[ac].cwMin;
 	//post transmit backoff
-	myQueues[ac].currentBackoff = intuniform(0,myQueues[ac].cwCur);
+	myQueues[ac].currentBackoff = OWNER intuniform(0,myQueues[ac].cwCur);
 	statsSlotsBackoff += myQueues[ac].currentBackoff;
 	statsNumBackoff++;
 	DBG_MAC << "Queue " << ac << " will go into post-transmit backoff for " << myQueues[ac].currentBackoff << " slots" << std::endl;
@@ -794,7 +795,7 @@ void Mac1609_4::channelIdle(bool afterSwitch) {
 		//this rare case can happen when another node's time has such a big offset that the node sent a packet although we already changed the channel
 		//the workaround is not trivial and requires a lot of changes to the phy and decider
 		return;
-		//opp_error("channel turned idle but contention timer was scheduled!");
+		//throw cRuntimeError("channel turned idle but contention timer was scheduled!");
 	}
 
 	idleChannel = true;
@@ -841,9 +842,20 @@ void Mac1609_4::setParametersForBitrate(uint64_t bitrate) {
 			return;
 		}
 	}
-	opp_error("Chosen Bitrate is not valid for 802.11p: Valid rates are: 3Mbps, 4.5Mbps, 6Mbps, 9Mbps, 12Mbps, 18Mbps, 24Mbps and 27Mbps. Please adjust your omnetpp.ini file accordingly.");
+	throw cRuntimeError("Chosen Bitrate is not valid for 802.11p: Valid rates are: 3Mbps, 4.5Mbps, 6Mbps, 9Mbps, 12Mbps, 18Mbps, 24Mbps and 27Mbps. Please adjust your omnetpp.ini file accordingly.");
 }
 
+bool Mac1609_4::isChannelSwitchingActive() {
+    return useSCH;
+}
+
+simtime_t Mac1609_4::getSwitchingInterval() {
+    return SWITCHING_INTERVAL_11P;
+}
+
+bool Mac1609_4::isCurrentChannelCCH() {
+    return (activeChannel ==  type_CCH);
+}
 
 simtime_t Mac1609_4::getFrameDuration(int payloadLengthBits, enum PHY_MCS mcs) const {
     simtime_t duration;
@@ -858,4 +870,3 @@ simtime_t Mac1609_4::getFrameDuration(int payloadLengthBits, enum PHY_MCS mcs) c
 
 	return duration;
 }
-

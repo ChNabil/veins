@@ -54,6 +54,7 @@
  * @see PhyLayer80211p
  * @see Decider80211p
  */
+
 class Mac1609_4 : public BaseMacLayer,
 	public WaveAppToMac1609_4Interface {
 
@@ -84,11 +85,13 @@ class Mac1609_4 : public BaseMacLayer,
 						};
 				};
 
-				EDCA(t_channel channelType,int maxQueueLength = 0):numQueues(0),maxQueueSize(maxQueueLength),channelType(channelType) {
+				EDCA(cModule *owner, t_channel channelType,int maxQueueLength = 0):owner(owner),numQueues(0),maxQueueSize(maxQueueLength),channelType(channelType) {
 					statsNumInternalContention = 0;
 					statsNumBackoff = 0;
 					statsSlotsBackoff = 0;
 				};
+                const cObject *getThisPtr() const  {return NULL;}
+                const char *getClassName() const {return "Mac1609_4::EDCA"; }
 				/*
 				 * Currently you have to call createQueue in the right order. First Call is priority 0, second 1 and so on...
 				 */
@@ -106,6 +109,7 @@ class Mac1609_4 : public BaseMacLayer,
 				WaveShortMessage* initiateTransmit(simtime_t idleSince);
 
 			public:
+				cModule *owner;
 				std::map<t_access_category,EDCAQueue> myQueues;
 				int numQueues;
 				uint32_t maxQueueSize;
@@ -123,6 +127,15 @@ class Mac1609_4 : public BaseMacLayer,
 
 	public:
 		~Mac1609_4() { };
+
+		/**
+		 * @brief return true if alternate access is enabled
+		 */
+		bool isChannelSwitchingActive();
+
+		simtime_t getSwitchingInterval();
+
+		bool isCurrentChannelCCH();
 
 		void changeServiceChannel(int channelNumber);
 

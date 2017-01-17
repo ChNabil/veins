@@ -14,11 +14,14 @@ simple BasePhyLayer like IWirelessPhy
         double thermalNoise @unit(dBm);	//the strength of the thermal noise [dBm]
         bool useThermalNoise;			//should thermal noise be considered?
 
+		
+		xml antenna = default(xml("<root><Antenna type=\"IsotropicAntenna\"></Antenna></root>"));
+		
+		
         xml analogueModels; 			//Specification of the analogue models to use and their parameters
         xml decider;					//Specification of the decider to use and its parameters
 
 		double sensitivity @unit(dBm);	//The sensitivity of the physical layer [dBm]
-        double maxTXPower @unit(mW);	//The maximum transimission power of the physical layer [mW]
 
         //# switch times [s]:
         double timeRXToTX       = default(0) @unit(s); // Elapsed time to switch from receive to send state

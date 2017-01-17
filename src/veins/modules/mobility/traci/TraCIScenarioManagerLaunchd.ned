@@ -35,6 +35,7 @@ package org.car2x.veins.modules.mobility.traci;
 // @see TraCIMobility
 // @see TraCIScenarioManager
 //
+
 simple TraCIScenarioManagerLaunchd
 {
     parameters:
@@ -44,9 +45,9 @@ simple TraCIScenarioManagerLaunchd
         double connectAt @unit("s") = default(0s);  // when to connect to TraCI server (must be the initial timestep of the server)
         double firstStepAt @unit("s") = default(-1s);  // when to start synchronizing with the TraCI server (-1: immediately after connecting)
         double updateInterval @unit("s") = default(1s);  // time interval of hosts' position updates
-        string moduleType = default("inet.nodes.wireless.WirelessHostSimplified");  // module type to be used in the simulation for each managed vehicle
-        string moduleName = default("host");  // module name to be used in the simulation for each managed vehicle
-        string moduleDisplayString = default("i=misc/node2;is=vs;r=0,,#707070,1");  // module displayString to be used in the simulation for each managed vehicle
+        string moduleType = default("org.car2x.veins.nodes.Car");  // module type to be used in the simulation for each managed vehicle
+        string moduleName = default("node");  // module name to be used in the simulation for each managed vehicle
+        string moduleDisplayString = default("");  // module displayString to be used in the simulation for each managed vehicle
         string host = default("localhost");  // sumo-launchd.py server hostname
         int port = default(9999);  // sumo-launchd.py server port
         xml launchConfig; // launch configuration to send to sumo-launchd.py
@@ -54,7 +55,7 @@ simple TraCIScenarioManagerLaunchd
         bool autoShutdown = default(true);  // Shutdown module as soon as no more vehicles are in the simulation
         int margin = default(25);  // margin to add to all received vehicle positions
         string roiRoads = default("");  // which roads (e.g. "hwy1 hwy2") are considered to consitute the region of interest, if not empty
-        string roiRects = default("");  // which rectangles (e.g. "0,0-10,10 20,20-30,30) are considered to consitute the region of interest, if not empty
+        string roiRects = default("");  // which rectangles (e.g. "0,0-10,10 20,20-30,30) are considered to consitute the region of interest, if not empty. Note that these rectangles have to use TraCI (SUMO) coordinates and not OMNeT++. They can be easily read from sumo-gui.
         double penetrationRate = default(1); //the probability of a vehicle being equipped with Car2X technology
         int numVehicles = default(0);
         bool useRouteDistributions = default(false);

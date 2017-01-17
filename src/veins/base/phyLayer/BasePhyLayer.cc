@@ -1,10 +1,13 @@
 #include "veins/base/phyLayer/BasePhyLayer.h"
 
-#include <cxmlelement.h>
-
+#include <string>
+#include <sstream>
+#include <vector>
 #include "veins/base/phyLayer/MacToPhyControlInfo.h"
 #include "veins/base/phyLayer/PhyToMacControlInfo.h"
 #include "veins/base/utils/FindModule.h"
+#include "veins/base/utils/POA.h"
+#include "veins/modules/phy/SampledAntenna1D.h"
 #include "veins/base/phyLayer/AnalogueModel.h"
 #include "veins/base/phyLayer/Decider.h"
 #include "veins/base/modules/BaseWorldUtility.h"
@@ -14,8 +17,6 @@ using Veins::AirFrame;
 
 //introduce BasePhyLayer as module to OMNet
 Define_Module(BasePhyLayer);
-
-short BasePhyLayer::airFramePriority = 10;
 
 Coord NoMobiltyPos = Coord::ZERO;
 
@@ -66,7 +67,7 @@ void BasePhyLayer::initialize(int stage) {
 		//	- initialize basic parameters
 		if(par("useThermalNoise").boolValue()) {
 			double thermalNoiseVal = FWMath::dBm2mW(par("thermalNoise").doubleValue());
-			thermalNoise = new ConstantSimpleConstMapping(DimensionSet::timeDomain,
+			thermalNoise = new ConstantSimpleConstMapping(DimensionSet::timeDomain(),
 														  thermalNoiseVal);
 		} else {
 			thermalNoise = 0;
@@ -74,7 +75,6 @@ void BasePhyLayer::initialize(int stage) {
 		headerLength = par("headerLength").longValue();
 		sensitivity = par("sensitivity").doubleValue();
 		sensitivity = FWMath::dBm2mW(sensitivity);
-		maxTXPower = par("maxTXPower").doubleValue();
 
 		recordStats = par("recordStats").boolValue();
 
@@ -84,12 +84,12 @@ void BasePhyLayer::initialize(int stage) {
 		// get pointer to the world module
 		world = FindModule<BaseWorldUtility*>::findGlobalModule();
         if (world == NULL) {
-            opp_error("Could not find BaseWorldUtility module");
+            throw cRuntimeError("Could not find BaseWorldUtility module");
         }
 
         if(cc->hasPar("sat")
 		   && (sensitivity - FWMath::dBm2mW(cc->par("sat").doubleValue())) < -0.000001) {
-            opp_error("Sensitivity can't be smaller than the "
+            throw cRuntimeError("Sensitivity can't be smaller than the "
 					  "signal attenuation threshold (sat) in ConnectionManager. "
 					  "Please adjust your omnetpp.ini file accordingly.");
 		}
@@ -100,6 +100,10 @@ void BasePhyLayer::initialize(int stage) {
 		initializeAnalogueModels(par("analogueModels").xmlValue());
 		//	- decider parameters
 		initializeDecider(par("decider").xmlValue());
+		//  - antenna parameters
+		initializeAntenna(par("antenna").xmlValue());
+
+
 
 		//initialise timer messages
 		radioSwitchingOverTimer = new cMessage("radio switching over", RADIO_SWITCHING_OVER);
@@ -149,10 +153,8 @@ void BasePhyLayer::getParametersFromXML(cXMLElement* xmlData, ParameterMap& outp
 		const char* name = (*it)->getAttribute("name");
 		const char* type = (*it)->getAttribute("type");
 		const char* value = (*it)->getAttribute("value");
-		if(name == 0 || type == 0 || value == 0) {
-			ev << "Invalid parameter, could not find name, type or value." << endl;
-			continue;
-		}
+		if(name == 0 || type == 0 || value == 0)
+			throw cRuntimeError("Invalid parameter, could not find name, type or value");
 
 		std::string sType = type; 	//needed for easier comparision
 		std::string sValue = value;	//needed for easier comparision
@@ -173,8 +175,7 @@ void BasePhyLayer::getParametersFromXML(cXMLElement* xmlData, ParameterMap& outp
 			param.setLongValue(strtol(value, 0, 0));
 
 		} else {
-			ev << "Unknown parameter type: \"" << sType << "\"" << endl;
-			continue;
+			throw cRuntimeError("Unknown parameter type: '%s'", sType.c_str());
 		}
 
 		//add parameter to output map
@@ -195,20 +196,17 @@ void BasePhyLayer::initializeDecider(cXMLElement* xmlConfig) {
 	decider = 0;
 
 	if(xmlConfig == 0) {
-		opp_error("No decider configuration file specified.");
-		return;
+		throw cRuntimeError("No decider configuration file specified.");
 	}
 
 	cXMLElementList deciderList = xmlConfig->getElementsByTagName("Decider");
 
 	if(deciderList.empty()) {
-		opp_error("No decider configuration found in configuration file.");
-		return;
+		throw cRuntimeError("No decider configuration found in configuration file.");
 	}
 
 	if(deciderList.size() > 1) {
-		opp_error("More than one decider configuration found in configuration file.");
-		return;
+		throw cRuntimeError("More than one decider configuration found in configuration file.");
 	}
 
 	cXMLElement* deciderData = deciderList.front();
@@ -216,8 +214,7 @@ void BasePhyLayer::initializeDecider(cXMLElement* xmlConfig) {
 	const char* name = deciderData->getAttribute("type");
 
 	if(name == 0) {
-		opp_error("Could not read type of decider from configuration file.");
-		return;
+		throw cRuntimeError("Could not read type of decider from configuration file.");
 	}
 
 	ParameterMap params;
@@ -226,8 +223,7 @@ void BasePhyLayer::initializeDecider(cXMLElement* xmlConfig) {
 	decider = getDeciderFromName(name, params);
 
 	if(decider == 0) {
-		opp_error("Could not find a decider with the name \"%s\".", name);
-		return;
+		throw cRuntimeError("Could not find a decider with the name \"%s\".", name);
 	}
 
 	coreEV << "Decider \"" << name << "\" loaded." << endl;
@@ -237,6 +233,106 @@ Decider* BasePhyLayer::getDeciderFromName(std::string name, ParameterMap& params
 {
 	return 0;
 }
+
+
+//-----Antenna initialization----------------------
+
+void BasePhyLayer::initializeAntenna(cXMLElement* xmlConfig) {
+    antenna = 0;
+
+    if(xmlConfig == 0) {
+        throw cRuntimeError("No antenna configuration file specified.");
+    }
+
+    cXMLElementList antennaList = xmlConfig->getElementsByTagName("Antenna");
+
+    if(antennaList.empty()) {
+        throw cRuntimeError("No antenna configuration found in configuration file.");
+    }
+
+    cXMLElement* antennaData;
+    if(antennaList.size() > 1) {
+        int num = intuniform(0, antennaList.size() - 1);
+        antennaData = antennaList[num];
+    } else {
+        antennaData = antennaList.front();
+    }
+
+    const char* name = antennaData->getAttribute("type");
+
+    if(name == 0) {
+        throw cRuntimeError("Could not read type of antenna from configuration file.");
+    }
+
+    ParameterMap params;
+    getParametersFromXML(antennaData, params);
+
+    antenna = getAntennaFromName(name, params);
+
+    if(antenna == 0) {
+        throw cRuntimeError("Could not find an antenna with the name \"%s\".", name);
+    }
+
+    const char* id = antennaData->getAttribute("id");
+    coreEV << "Antenna \"" << name << "\" with ID \"" << id << "\" loaded." << endl;
+}
+
+std::shared_ptr<Antenna> BasePhyLayer::getAntennaFromName(std::string name, ParameterMap& params) {
+    if (name == "SampledAntenna1D") {
+        return initializeSampledAntenna1D(params);
+    }
+
+    return std::make_shared<Antenna>();
+}
+
+std::shared_ptr<Antenna> BasePhyLayer::initializeSampledAntenna1D(ParameterMap& params) {
+    // get samples of the modeled antenna and put them in a vector
+    ParameterMap::iterator it = params.find("samples");
+    std::vector<double> values;
+    if (it != params.end())
+    {
+        std::string buf;
+        std::stringstream samplesStream(it->second.stringValue());
+        while (samplesStream >> buf){
+            values.push_back(stod(buf));
+        }
+    } else {
+        throw cRuntimeError("BasePhyLayer::initializeSampledAntenna1D(): No samples specified for this antenna. \
+                           Please adjust your xml file accordingly.");
+    }
+
+    // get optional random offsets for the antenna's samples
+    it = params.find("random-offsets");
+    std::string offsetType = "";
+    std::vector<double> offsetParams;
+    if (it != params.end())
+    {
+        std::string buf;
+        std::stringstream offsetStream(it->second.stringValue());
+        offsetStream >> offsetType;
+        while (offsetStream >> buf){
+            offsetParams.push_back(stod(buf));
+        }
+    }
+
+    // get optional random rotation of the whole pattern
+    it = params.find("random-rotation");
+    std::string rotationType = "";
+    std::vector<double> rotationParams;
+    if (it != params.end())
+    {
+        std::string buf;
+        std::stringstream rotationStream(it->second.stringValue());
+        rotationStream >> rotationType;
+        while (rotationStream >> buf){
+            rotationParams.push_back(stod(buf));
+        }
+    }
+
+    return std::make_shared<SampledAntenna1D>(values, offsetType, offsetParams, rotationType, rotationParams, this->getRNG(0));
+}
+
+
 
 
 //-----AnalogueModels initialization----------------
@@ -255,7 +351,7 @@ void BasePhyLayer::initializeAnalogueModels(cXMLElement* xmlConfig) {
 
 	if(newAnalogueModel == 0)
 	{
-		opp_warning("Could not find an analogue model with the name \"%s\".", s.c_str());
+		throw cRuntimeError("Could not find an analogue model with the name \"%s\".", s.c_str());
 	}
 	else
 	{
@@ -264,15 +360,13 @@ void BasePhyLayer::initializeAnalogueModels(cXMLElement* xmlConfig) {
 
 
 	if(xmlConfig == 0) {
-		opp_warning("No analogue models configuration file specified.");
-		return;
+		throw cRuntimeError("No analogue models configuration file specified.");
 	}
 
 	cXMLElementList analogueModelList = xmlConfig->getElementsByTagName("AnalogueModel");
 
 	if(analogueModelList.empty()) {
-		opp_warning("No analogue models configuration found in configuration file.");
-		return;
+		throw cRuntimeError("No analogue models configuration found in configuration file.");
 	}
 
 	// iterate over all AnalogueModel-entries, get a new AnalogueModel instance and add
@@ -286,8 +380,7 @@ void BasePhyLayer::initializeAnalogueModels(cXMLElement* xmlConfig) {
 		const char* name = analogueModelData->getAttribute("type");
 
 		if(name == 0) {
-			opp_warning("Could not read name of analogue model.");
-			continue;
+			throw cRuntimeError("Could not read name of analogue model.");
 		}
 
 		ParameterMap params;
@@ -296,8 +389,7 @@ void BasePhyLayer::initializeAnalogueModels(cXMLElement* xmlConfig) {
 		AnalogueModel* newAnalogueModel = getAnalogueModelFromName(name, params);
 
 		if(newAnalogueModel == 0) {
-			opp_warning("Could not find an analogue model with the name \"%s\".", name);
-			continue;
+			throw cRuntimeError("Could not find an analogue model with the name \"%s\".", name);
 		}
 
 		// attach the new AnalogueModel to the AnalogueModelList
@@ -345,14 +437,14 @@ void BasePhyLayer::handleMessage(cMessage* msg) {
 
 	//unknown message
 	} else {
-		ev << "Unknown message received." << endl;
+		EV << "Unknown message received." << endl;
 		delete msg;
 	}
 }
 
 void BasePhyLayer::handleAirFrame(AirFrame* frame) {
 	//TODO: ask jerome to set air frame priority in his UWBIRPhy
-	//assert(frame->getSchedulingPriority() == airFramePriority);
+	//assert(frame->getSchedulingPriority() == airFramePriority());
 
 	switch(frame->getState()) {
 	case START_RECEIVE:
@@ -368,8 +460,7 @@ void BasePhyLayer::handleAirFrame(AirFrame* frame) {
 		break;
 
 	default:
-		opp_error( "Unknown AirFrame state: %s", frame->getState());
-		break;
+		throw cRuntimeError( "Unknown AirFrame state: %s", frame->getState());
 	}
 }
 
@@ -432,7 +523,7 @@ void BasePhyLayer::handleAirFrameReceiving(AirFrame* frame) {
 
 	//invalid point in time
 	} else if(nextHandleTime < simTime() || nextHandleTime > signalEndTime) {
-		opp_error("Invalid next handle time returned by Decider. Expected a value between current simulation time (%.2f) and end of signal (%.2f) but got %.2f",
+		throw cRuntimeError("Invalid next handle time returned by Decider. Expected a value between current simulation time (%.2f) and end of signal (%.2f) but got %.2f",
 								SIMTIME_DBL(simTime()), SIMTIME_DBL(signalEndTime), SIMTIME_DBL(nextHandleTime));
 	}
 
@@ -466,7 +557,7 @@ void BasePhyLayer::handleUpperMessage(cMessage* msg){
 	{
         delete msg;
         msg = 0;
-		opp_error("Error: message for sending received, but radio not in state TX");
+		throw cRuntimeError("Error: message for sending received, but radio not in state TX");
 	}
 
 	// check if not already sending
@@ -474,13 +565,24 @@ void BasePhyLayer::handleUpperMessage(cMessage* msg){
 	{
         delete msg;
         msg = 0;
-		opp_error("Error: message for sending received, but radio already sending");
+		throw cRuntimeError("Error: message for sending received, but radio already sending");
 	}
 
 	// build the AirFrame to send
 	assert(dynamic_cast<cPacket*>(msg) != 0);
 
 	AirFrame* frame = encapsMsg(static_cast<cPacket*>(msg));
+
+	// Prepare a POA object and attach it to the created Airframe
+    BaseMobility* sendersMobility = ChannelMobilityAccessType::get(this->getParentModule());
+    assert(sendersMobility);
+    Coord pos  = sendersMobility->getCurrentPosition();
+    Coord orient = sendersMobility->getCurrentOrientation();
+	POA* poa = new POA(pos, orient, antenna);
+	frame->setPoa(*poa);
+	// the frame is now owner of the POA object
+	delete poa;
+	poa = 0;
 
 	// make sure there is no self message of kind TX_OVER scheduled
 	// and schedule the actual one
@@ -517,7 +619,7 @@ AirFrame *BasePhyLayer::encapsMsg(cPacket *macPkt)
 	//channel consistency (before any thing else happens at a time
 	//point t make sure that the channel has removed every AirFrame
 	//ended at t and added every AirFrame started at t)
-	frame->setSchedulingPriority(airFramePriority);
+	frame->setSchedulingPriority(airFramePriority());
 	frame->setProtocolId(myProtocolId());
 	frame->setBitLength(headerLength);
 	frame->setId(world->getUniqueAirFrameId());
@@ -554,7 +656,7 @@ void BasePhyLayer::handleChannelSenseRequest(cMessage* msg) {
 			channelInfo.startRecording(simTime());
 		}
 	} else if(nextHandleTime >= 0.0){
-		opp_error("Next handle time of ChannelSenseRequest returned by the Decider is smaller then current simulation time: %.2f",
+		throw cRuntimeError("Next handle time of ChannelSenseRequest returned by the Decider is smaller then current simulation time: %.2f",
 				SIMTIME_DBL(nextHandleTime));
 	}
 
@@ -569,8 +671,7 @@ void BasePhyLayer::handleUpperControlMessage(cMessage* msg){
 		handleChannelSenseRequest(msg);
 		break;
 	default:
-		ev << "Received unknown control message from upper layer!" << endl;
-		break;
+		throw cRuntimeError("Received unknown control message from upper layer!");
 	}
 }
 
@@ -628,6 +729,26 @@ void BasePhyLayer::sendSelfMessage(cMessage* msg, simtime_t_cref time) {
 
 
 void BasePhyLayer::filterSignal(AirFrame *frame) {
+    // determine antenna gains first
+    // get POA from frame with the sender's position, orientation and antenna
+    POA& senderPOA = frame->getPoa();
+    // get own mobility module
+    BaseMobility* ownMobility = ChannelMobilityAccessType::get(this->getParentModule());
+    assert(ownMobility);
+    Coord ownPos  = ownMobility->getCurrentPosition();
+    Coord ownOrient = ownMobility->getCurrentOrientation();
+    // compute gains at sender and receiver antenna
+    double ownGain = antenna->getGain(ownPos, ownOrient, senderPOA.pos);
+    double otherGain = senderPOA.antenna->getGain(senderPOA.pos, senderPOA.orientation, ownPos);
+
+    coreEV << "Sender's antenna gain: " << otherGain << endl;
+    coreEV << "Own (receiver's) antenna gain: " << ownGain << endl;
+    // add the resulting total gain to the attenuations list using a ConstantSimpleConstMapping
+    bool hasFrequency = frame->getSignal().getTransmissionPower()->getDimensionSet().hasDimension(Dimension::frequency());
+    const DimensionSet& domain = hasFrequency ? DimensionSet::timeFreqDomain() : DimensionSet::timeDomain();
+    frame->getSignal().addAttenuation(new ConstantSimpleConstMapping(domain, ownGain*otherGain));
+
+    // go on with AnalogueModels
 	if (analogueModels.empty())
 		return;
 
@@ -732,7 +853,7 @@ simtime_t BasePhyLayer::setRadioState(int rs) {
 	assert(radio);
 
 	if(txOverTimer && txOverTimer->isScheduled()) {
-		opp_warning("Switched radio while sending an AirFrame. The effects this would have on the transmission are not simulated by the BasePhyLayer!");
+		EV_WARN << "Switched radio while sending an AirFrame. The effects this would have on the transmission are not simulated by the BasePhyLayer!";
 	}
 
 	simtime_t switchTime = radio->switchTo(rs, simTime());
@@ -770,7 +891,7 @@ int BasePhyLayer::getPhyHeaderLength() {
 
 void BasePhyLayer::setCurrentRadioChannel(int newRadioChannel) {
 	if(txOverTimer && txOverTimer->isScheduled()) {
-		opp_warning("Switched channel while sending an AirFrame. The effects this would have on the transmission are not simulated by the BasePhyLayer!");
+		EV_WARN << "Switched channel while sending an AirFrame. The effects this would have on the transmission are not simulated by the BasePhyLayer!";
 	}
 
 	radio->setCurrentChannel(newRadioChannel);
