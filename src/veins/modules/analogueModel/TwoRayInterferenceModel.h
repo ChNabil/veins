@@ -56,8 +56,6 @@ class TwoRayInterferenceModel: public AnalogueModel {
 
 		class Mapping: public SimpleConstMapping {
 			protected:
-				static DimensionSet dimensions;
-
 				double gamma;
 				double d;
 				double d_dir;
@@ -65,6 +63,8 @@ class TwoRayInterferenceModel: public AnalogueModel {
 				double lambda;
 				bool debug;
 			public:
+                static const DimensionSet dimensions;
+
 				Mapping(double gamma, double distance, double directDistance, double reflDistance, bool debug)
 					: SimpleConstMapping(dimensions),
 					gamma(gamma),

@@ -88,6 +88,7 @@ class BaseWaveApplLayer : public BaseApplLayer {
 		Coord curPosition;
 		int mySCH;
 		int myId;
+		double curAngle;    // Added by Ala'a
 
 		cMessage* sendBeaconEvt;
 

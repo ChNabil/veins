@@ -25,6 +25,8 @@ using Veins::AirFrame;
 
 #define debugEV (ev.isDisabled()||!debug) ? ev : ev << "PhyLayer(TwoRayInterferenceModel): "
 
+const DimensionSet TwoRayInterferenceModel::Mapping::dimensions(Dimension::time_static(), Dimension::frequency_static());
+
 void TwoRayInterferenceModel::filterSignal(AirFrame *frame, const Coord& senderPos, const Coord& receiverPos) {
 	Signal& s = frame->getSignal();
 
@@ -55,10 +57,11 @@ void TwoRayInterferenceModel::filterSignal(AirFrame *frame, const Coord& senderP
 
 	debugEV << "Add TwoRayInterferenceModel attenuation (gamma, d, d_dir, d_ref) = (" << gamma << ", " << d << ", " << d_dir << ", " << d_ref << ")" << endl;
 
-        s.addAttenuation(new TwoRayInterferenceModel::Mapping(gamma, d, d_dir, d_ref, debug));
+	ConstMapping* tmp = new TwoRayInterferenceModel::Mapping(gamma, d, d_dir, d_ref, debug);
+	assert(Dimension::time != Dimension::frequency);
+	assert(tmp->getDimensionSet().hasDimension(Dimension::time) && tmp->getDimensionSet().hasDimension(Dimension::frequency));
+    s.addAttenuation(tmp);
 }
-
-DimensionSet TwoRayInterferenceModel::Mapping::dimensions(DimensionSet::timeFreqDomain);
 
 double TwoRayInterferenceModel::Mapping::getValue(const Argument& pos) const {
 

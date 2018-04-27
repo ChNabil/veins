@@ -736,6 +736,12 @@ public:
 	ConstMapping(const DimensionSet& dimSet):
 		dimensions(dimSet) {
 
+	    if(!dimSet.hasDimension(Dimension::time)){
+            std::cout << "dimSet does not have Dimension::time, failure incoming" << std::endl;
+            for(auto dim : dimSet){
+                std::cout << dim << " occurs " << dimSet.count(dim) << " times in dimSet" << std::endl;
+            }
+	    }
 		assert(dimSet.hasDimension(Dimension::time));
 	}
 

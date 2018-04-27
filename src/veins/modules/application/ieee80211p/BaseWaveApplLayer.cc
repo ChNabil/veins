@@ -76,6 +76,7 @@ WaveShortMessage*  BaseWaveApplLayer::prepareWSM(std::string name, int lengthBit
 	wsm->setRecipientAddress(rcvId);
 	wsm->setSenderPos(curPosition);
 	wsm->setSerial(serial);
+	wsm->setSenderAngle(curAngle); // added by Ala'a
 
 	if (name == "beacon") {
 		DBG << "Creating Beacon with Priority " << priority << " at Applayer at " << wsm->getTimestamp() << std::endl;

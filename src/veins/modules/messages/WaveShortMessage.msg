@@ -20,6 +20,8 @@
 
 cplusplus {{
 #include "veins/base/utils/Coord.h"
+#include <vector>
+
 }}
 
 class noncobject Coord;
@@ -49,4 +51,9 @@ packet WaveShortMessage {
 	int serial = 0;
 	Coord senderPos;
 	simtime_t timestamp = 0;
+	double senderAngle;     // Added by Ala'a
+	//intvector IDsInBeacon; // <int>;    // Added by Ala'a
+	int IntVector [500];
+	bool SenderIsAttackerInWSM;
+	
 }

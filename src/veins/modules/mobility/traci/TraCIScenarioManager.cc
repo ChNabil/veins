@@ -140,11 +140,11 @@ void TraCIScenarioManager::init_traci() {
 		uint32_t apiVersion = version.first;
 		std::string serverVersion = version.second;
 
-		if (apiVersion == 8) {
+		if (apiVersion == TRACI_VERSION) {
 			MYDEBUG << "TraCI server \"" << serverVersion << "\" reports API version " << apiVersion << endl;
 		}
 		else {
-			error("TraCI server \"%s\" reports API version %d, which is unsupported. We recommend using SUMO 0.21.0.", serverVersion.c_str(), apiVersion);
+			error("TraCI server \"%s\" reports API version %d, which is unsupported. We recommend using SUMO 0.29.0.", serverVersion.c_str(), apiVersion);
 		}
 
 	}
@@ -637,7 +637,7 @@ void TraCIScenarioManager::processVehicleSubscription(std::string objectId, TraC
 			ASSERT(varType == TYPE_STRINGLIST);
 			uint32_t count; buf >> count;
 			MYDEBUG << "TraCI reports " << count << " active vehicles." << endl;
-			ASSERT(count == drivingVehicleCount);
+			//ASSERT(count == drivingVehicleCount);
 			std::set<std::string> drivingVehicles;
 			for (uint32_t i = 0; i < count; ++i) {
 				std::string idstring; buf >> idstring;

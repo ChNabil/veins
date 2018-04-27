@@ -1,0 +1,144 @@
+#!/bin/bash
+#MSUB -N posverif_job
+#MSUB -j oe
+#MSUB -o $(JOBNAME).$(JOBID)
+#MSUB -m a
+#MSUB -q singlenode
+#MSUB -M 'rens.vanderheijden@uni-ulm.de'
+#MSUB -l nodes=1:ppn=2
+#MSUB -l mem=4000mb
+#MSUB -l walltime=5:00:00
+#
+# NOTE: Param 1 MUST be Config and 2 must be the lower #RUN and 3 the upper #RUN
+#
+CONFIG=$1
+L=$2
+H=$L
+ 
+start=$(date +%s)
+ 
+echo " "
+echo "### Setting up shell environment ..."
+echo " "
+if test -e "/etc/profile"; then source "/etc/profile"; fi;
+if test -e "$HOME/.bash_profile"; then source "$HOME/.bash_profile"; fi;
+unset LANG; export LC_ALL="C"; export MKL_NUM_THREADS=1; export OMP_NUM_THREADS=1
+export USER=${USER:=`logname`}
+export SLURM_JOB_ID=${SLURM_JOB_ID:=`date +%s`}
+export SLURM_SUBMIT_DIR=${SLURM_SUBMIT_DIR:=`pwd`}
+export SLURM_JOB_NAME=${SLURM_JOB_NAME:=`basename "$0"`}
+export SLURM_JOB_NAME=$(echo "${SLURM_JOB_NAME}" | sed 's/[^a-zA-Z0-9._-]/_/g')
+ 
+echo " "
+echo "### Printing basic job infos to stdout ..."
+echo " "
+echo "START_TIME           = `date +'%y-%m-%d %H:%M:%S %s'`"
+echo "HOSTNAME             = ${HOSTNAME}"
+echo "USER                 = ${USER}"
+echo "SLURM_JOB_NAME       = ${SLURM_JOB_NAME}"
+echo "SLURM_JOB_ID         = ${SLURM_JOB_ID}"
+echo "SLURM_SUBMIT_DIR     = ${SLURM_SUBMIT_DIR}"
+echo "SLURM_NTASKS         = ${SLURM_NTASKS}"
+echo "SLURM_NODELIST       = ${SLURM_NODELIST}"
+ 
+echo "Working Directory:                    $PWD"
+echo "Running on host                       $HOSTNAME"
+echo "Job id:                               $MOAB_JOBID"
+echo "Job name:                             $MOAB_JOBNAME"
+echo "Number of nodes allocated to job:     $MOAB_NODECOUNT"
+echo "Number of cores allocated to job:     $MOAB_PROCCOUNT"
+ 
+VEINS_DIR="${HOME}/veins"
+
+export SUMO_BIN="${HOME}/sumo/sumo-0.29.0/bin/sumo"
+ 
+# Create Work Dir
+ 
+echo " "
+echo "### Creating JOB directory in WORKSPACE"
+echo " "
+JOB_WORK_DIR="${WORK}/${SLURM_JOB_NAME}.uc1.${SLURM_JOB_ID%%.*}.$(date +%y%m%d_%H%M%S)"
+
+if [ -z ${JOB_WORK_DIR} ]; then echo "could not determine job working directory, using /tmp"; JOB_WORK_DIR="/tmp"; fi
+ 
+echo "JOB_WORK_DIR = ${JOB_WORK_DIR}"
+ 
+mkdir -vp "${JOB_WORK_DIR}"
+cd "${JOB_WORK_DIR}"
+ 
+cp -r "${VEINS_DIR}" "${JOB_WORK_DIR}"
+export SIMULATION_DIR="${JOB_WORK_DIR}/veins/simulations/lust"
+
+# Load OMNET
+module unload cae/omnet/4.6_inet3.0.0
+module load mpi/openmpi/1.8-gnu-4.9
+module load cae/omnet/4.6
+#load python2
+module load devel/python/2.7.10
+
+if test -z "$OMNET_HOME"; then
+ echo "ERROR: Failed to load module 'cae/omnet'."
+ exit 101
+fi
+echo "OMNET_BIN_DIR = $OMNET_HOME"
+ 
+# Load GCC4.9
+module load compiler/gnu/4.9
+ 
+module list
+
+cd "${SIMULATION_DIR}"
+
+echo ''
+echo "##############################"
+echo "# Starting runs ${L} to ${H} #"
+echo "##############################"
+
+for K in $(seq ${L} ${H}); do
+# Execute opp_run with runnumber $RUN and config $CONFIG
+ LISTENING_PORT="`${HOME}/findFreePort.sh`"
+ echo "python2 ../../sumo-launchd.py -p${LISTENING_PORT} -dc ${SUMO_BIN}"
+ python2 ../../sumo-launchd.py -p${LISTENING_PORT} -dc ${SUMO_BIN}
+ cp omnetpp.ini omnetpp_${K}.ini
+ echo "*.manager.port = ${LISTENING_PORT}" >> omnetpp_${K}.ini
+ echo "./run -c "$CONFIG" -f omnetpp_${K}.ini -r "${K}" > RUN_${K}.txt"
+ ./run -c "$CONFIG" -f omnetpp_${K}.ini -r "${K}" > RUN_${K}.txt
+ sleep 1
+done
+ 
+if [ ! -d "${SIMULATION_DIR}/results" ]; then
+ echo "No resultdir"
+fi
+ 
+let RUNS=$H-$L+1
+RES_FILE_COUNT=$(ls "${SIMULATION_DIR}/results/" | grep .sca | wc -l)
+if [ $RES_FILE_COUNT -lt $RUNS ]; then
+ echo "Not all runs ran through"
+fi
+ 
+echo " "
+echo "### Compressing results and copying back result archive ..."
+echo " "
+ 
+mkdir -vp "${SLURM_SUBMIT_DIR}" # if user has deleted or moved the submit dir
+echo "Creating result tgz-file '${JOB_WORK_DIR}.tgz' ..."
+tar -zcvf "${JOB_WORK_DIR}.tgz" "${SIMULATION_DIR}/RUN*" "${SIMULATION_DIR}/results/" \
+  || { echo "ERROR: Failed to create tgz-file. Please cleanup JOB_WORK_DIR '$JOB_WORK_DIR' on host '$HOSTNAME' manually (if not done automatically by queueing system)."; exit 102; }
+mv "${JOB_WORK_DIR}.tgz" "${HOME}/"
+ 
+echo " "
+echo "### Final cleanup..."
+echo " "
+rm -rvf "${JOB_WORK_DIR}"
+echo "END_TIME             = `date +'%y-%m-%d %H:%M:%S %s'`"
+ 
+end=$(date +%s)
+echo " "
+echo "### Calculate duration ..."
+echo " "
+diff=$[end-start]
+if [ $diff -lt 60 ]; then
+   echo "Runtime (approx.): '$diff' secs"
+elif [ $diff -ge 60 ]; then
+   echo 'Runtime (approx.): '$[$diff / 60] 'min(s) '$[$diff % 60] 'secs'
+fi
